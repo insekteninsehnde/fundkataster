@@ -16,7 +16,7 @@ main{flex:1;min-height:0;display:flex}
 .tab{display:none;flex:1;min-height:0}.tab.on{display:flex}
 #mapw{flex:1;position:relative;min-width:0}#map{position:absolute;inset:0 0 34px 0;background:#dfe6dd}
 #hint{position:absolute;left:0;right:0;bottom:0;height:34px;background:#1d2733;color:#cfd6de;font-size:12px;padding:8px 14px;z-index:500}
-#sbox{position:absolute;top:10px;left:56px;right:10px;z-index:1000;max-width:420px}
+#sbox{position:absolute;top:10px;left:56px;right:150px;z-index:1000;max-width:420px}
 #sbox input{width:100%;padding:9px 12px;border:1px solid var(--bd);border-radius:8px;box-shadow:0 2px 8px #0002}
 #sres{background:#fff;border-radius:8px;margin-top:4px;box-shadow:0 2px 8px #0003;max-height:240px;overflow:auto;display:none}
 #sres div{padding:8px 12px;cursor:pointer;border-bottom:1px solid #eef0f2;font-size:13px}#sres div:hover{background:var(--gl)}
@@ -55,6 +55,7 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
 #lbPrint,#lbMeasure{position:absolute;left:-99999px;top:0}
 .lbPage{box-sizing:border-box;overflow:hidden;break-after:page;page-break-after:always;background:#fff}.lbPage:last-child{break-after:auto;page-break-after:auto}.lbGrid{display:grid;justify-content:start;align-content:start}
 @media print{body>*:not(#lbPrint){display:none!important}html,body{height:auto!important;display:block!important;background:#fff!important}#lbPrint{position:static!important;left:auto!important}}
+.basesw{display:flex;background:#fff;border-radius:8px;box-shadow:0 2px 8px #0003;overflow:hidden}.basesw button{border:0;background:#fff;padding:7px 12px;cursor:pointer;font:inherit;font-size:13px;color:var(--tx)}.basesw button.on{background:var(--g);color:#fff;font-weight:600}
 </style></head><body>
 <header>
  <div class="logo"><i>🦋</i><div><b>FalterKataster</b><span class="pill" id="stat">lokal</span><small>Insekten-Funddaten mit Fundort- und Art-Katalog – offline im Browser</small></div></div>
@@ -80,6 +81,7 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
    <label>Fundort-Vorlage auswählen</label><select id="siteSel" style="margin-bottom:10px"></select>
    <div class="row c2"><div><label>Flur / Bezeichnung</label><input id="flur" placeholder="z.B. Mergelkippe Bolzum"></div><div><label>Ort</label><input id="ort" placeholder="z.B. Sehnde"></div></div>
    <div class="row c4"><div><label>MTB</label><input id="mtb" placeholder="3625"></div><div><label>Q (Quadrant)</label><input id="mtbq" placeholder="1–4"></div><div><label>MF (Minutenfeld)</label><input id="mtbmf" placeholder="1–15"></div><div><label>PLZ</label><input id="plz" placeholder="31319"></div></div>
+   <p class="sub" id="mtbHint" style="font-size:11px;margin:-4px 0 10px"></p>
    <div class="row c4"><div><label>Lat (Dez)</label><input id="lat" type="number" step="any"></div><div><label>Lng (Dez)</label><input id="lng" type="number" step="any"></div><div><label>Höhe Min (m)</label><input id="hmin" type="number"></div><div><label>Höhe Max (m)</label><input id="hmax" type="number"></div></div>
    <label>DMS-Koordinaten</label><input id="dms" readonly style="margin-bottom:10px">
    <label>Beschreibung / Habitat</label><input id="hab" placeholder="z.B. Sonnenexponierte Brachfläche auf Muschelkalk"></div>
@@ -179,6 +181,7 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
  <div class="row c2"><div><label>Flur / Bezeichnung</label><input id="o_flur"></div><div><label>Ort</label><input id="o_ort"></div></div>
  <div class="row c4"><div><label>MTB</label><input id="o_mtb"></div><div><label>Q</label><input id="o_q"></div><div><label>MF</label><input id="o_mf"></div><div><label>PLZ</label><input id="o_plz"></div></div>
  <div class="row c4"><div><label>Lat (Dez)</label><input id="o_lat" type="number" step="any"></div><div><label>Lng (Dez)</label><input id="o_lng" type="number" step="any"></div><div><label>Höhe Min (m)</label><input id="o_hmin" type="number"></div><div><label>Höhe Max (m)</label><input id="o_hmax" type="number"></div></div>
+ <div class="row"><div><button type="button" class="btn s" id="o_mtbcalc">⟳ MTB / Q / MF aus Koordinaten berechnen</button></div></div>
  <div class="row"><div><label>Beschreibung / Habitat</label><input id="o_hab"></div></div>
  <div class="row c2"><div><label>Belegfoto ersetzen</label><input type="file" id="o_foto" accept="image/*"><label style="margin-top:6px"><input type="checkbox" id="o_rmfoto" style="width:auto"> Foto entfernen</label></div><div id="o_prev" style="align-self:end"></div></div>
  <div class="mbtn"><button class="btn s" id="o_cancel">Abbrechen</button><button class="btn" id="o_save">Speichern</button></div></div></div>
@@ -187,6 +190,7 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
  <div class="row c2"><div><label>Breitengrad (dezimal)</label><input id="m_lat" type="number" step="any" placeholder="52.29969"></div><div><label>Längengrad (dezimal)</label><input id="m_lng" type="number" step="any" placeholder="9.88561"></div></div>
  <div class="row c2"><div><label>Breitengrad (Grad°Min'Sek"N)</label><input id="m_dlat" placeholder='52°17&#39;58.9"N'></div><div><label>Längengrad (Grad°Min'Sek"E)</label><input id="m_dlng" placeholder='9°57&#39;33.9"E'></div></div>
  <div class="row c3"><div><label>MTB</label><input id="m_mtb" placeholder="3625"></div><div><label>Q</label><input id="m_q" placeholder="1–4"></div><div><label>MF</label><input id="m_mf" placeholder="1–15"></div></div>
+ <div class="row"><div><button type="button" class="btn s" id="m_mtbcalc">⟳ MTB / Q / MF aus Koordinaten berechnen</button></div></div>
  <div class="row c2"><div><label>Höhe Min (m)</label><input id="m_hmin" type="number"></div><div><label>Höhe Max (m)</label><input id="m_hmax" type="number"></div></div>
  <div class="row c2"><div><label>Ort</label><input id="m_ort"></div><div><label>PLZ</label><input id="m_plz"></div></div>
  <div class="row"><div><label>Beschreibung</label><textarea id="m_bes"></textarea></div></div>
@@ -227,6 +231,7 @@ function normSite(o){
  const orig=(v,c,p,n)=>{const s=String(v??"").trim();return /°/.test(s)?s:dms(c,p,n)};
  let mtb=g("mtb"),q=g("q"),mf=g("mf");
  const mm=mtb.match(/^(\d{4})_(\d)_(\d+)$/);if(mm&&!q&&!mf){mtb=mm[1];q=mm[2];mf=mm[3]}
+ if(ok&&!mtb&&!q&&!mf){const r=mtbFromCoord(la,ln);if(r){mtb=r.mtb;q=r.q;mf=r.mf}}
  const bes=g("beschreibung","hab","habitat");
  return{nr:o.nr??"",name,flur:g("flur")||name,lat:ok?la:"",lng:ok?ln:"",
   breitengrad_original:ok?orig(o.breitengrad_original,la,"N","S"):"",laengengrad_original:ok?orig(o.laengengrad_original,ln,"E","W"):"",
@@ -275,7 +280,7 @@ const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&g
 /* Tabs */
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button,.tab").forEach(e=>e.classList.remove("on"));b.classList.add("on");$(b.dataset.t).classList.add("on");if(b.dataset.t=="t1"&&map)setTimeout(()=>map.invalidateSize(),50)});
 /* Karte */
-let map,marker;
+let map,marker,tileLayer,mapMode=(()=>{try{return localStorage.getItem("ikMapMode")==="sat"?"sat":"osm"}catch(e){return"osm"}})();
 function initMap(){
  if(typeof L==="undefined"){$("map").innerHTML='<p style="padding:20px">Karte benötigt einmalig Internet (Leaflet &amp; Kacheln). Koordinaten können trotzdem rechts eingegeben werden.</p>';return}
  map=L.map("map").setView([52.37,9.73],10);
@@ -285,18 +290,18 @@ function initMap(){
   {url:"https://tile.openstreetmap.org/{z}/{x}/{y}.png",attr:"© OpenStreetMap contributors"},
   {url:"https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",attr:"© OpenStreetMap contributors © CARTO"}
  ];
- let tileIndex=0,tileLayer;
+ let tileIndex=0;
  const useTiles=()=>{if(tileLayer)map.removeLayer(tileLayer);const src=tileSources[tileIndex];tileLayer=L.tileLayer(src.url,{maxZoom:19,attribution:src.attr, crossOrigin:true});tileLayer.addTo(map);tileLayer.on("tileerror",()=>{if(tileIndex<tileSources.length-1){tileIndex++;useTiles()}else{$("hint").textContent="Kartendienste sind im Netzwerk blockiert. Koordinaten können weiterhin manuell eingegeben werden."}})};
- useTiles();
+ useTiles();baseCtl(map);applyBase(map,()=>tileLayer);
  map.on("click",e=>setPos(e.latlng.lat,e.latlng.lng,true));
 }
-function setPos(la,ln,fromMap){
- $("lat").value=(+la).toFixed(5);$("lng").value=(+ln).toFixed(5);updDms();
+function setPos(la,ln,fromMap,keepMtb){
+ $("lat").value=(+la).toFixed(5);$("lng").value=(+ln).toFixed(5);updDms();if(!keepMtb)fillMtb(la,ln);
  if(map){if(!marker)marker=L.marker([la,ln]).addTo(map);else marker.setLatLng([la,ln]);if(!fromMap)map.setView([la,ln],15)}
 }
 const dms=(v,p,n)=>{const h=v<0?n:p;const tot=Math.round(Math.abs(v)*36000)/10,d=Math.floor(tot/3600),m=Math.floor((tot-d*3600)/60),s=tot-d*3600-m*60;return `${d}°${String(m).padStart(2,"0")}'${s.toFixed(1).padStart(4,"0")}"${h}`};
 function updDms(){const a=parseFloat($("lat").value),b=parseFloat($("lng").value);$("dms").value=isNaN(a)||isNaN(b)?"":dms(a,"N","S")+" "+dms(b,"E","W")}
-["lat","lng"].forEach(i=>$(i).oninput=()=>{updDms();const a=parseFloat($("lat").value),b=parseFloat($("lng").value);if(map&&!isNaN(a)&&!isNaN(b)){if(!marker)marker=L.marker([a,b]).addTo(map);else marker.setLatLng([a,b]);map.setView([a,b],Math.max(map.getZoom(),13))}});
+["lat","lng"].forEach(i=>$(i).oninput=()=>{updDms();const a=parseFloat($("lat").value),b=parseFloat($("lng").value);if(!isNaN(a)&&!isNaN(b))fillMtb(a,b);if(map&&!isNaN(a)&&!isNaN(b)){if(!marker)marker=L.marker([a,b]).addTo(map);else marker.setLatLng([a,b]);map.setView([a,b],Math.max(map.getZoom(),13))}});
 $("q").onkeydown=async e=>{if(e.key!=="Enter")return;const q=$("q").value.trim();if(!q)return;const r=$("sres");r.style.display="block";r.innerHTML="<div>Suche…</div>";
  try{
   // Photon als erster Geocoder; Nominatim als Fallback.
@@ -316,14 +321,14 @@ function renderSel(){
 const findSp=v=>S.species.find(s=>spLabel(s)==v||s.sci==v||s.de==v);
 $("art").oninput=()=>{const s=findSp($("art").value),i=$("artinfo");if(!s){i.style.display="none";return}
  i.style.display="block";i.innerHTML=`<b>Überfamilie:</b> ${esc(s.ufam||"–")} &nbsp; <b>Familie:</b> ${esc(s.fam)} &nbsp; <b>Autor:</b> ${esc(s.aut)}<br><b>Rote Liste:</b> Nds. ${esc(s.nds||"–")} (2004: ${esc(s.nds04||"–")}) · D ${esc(s.rld||"–")}${s.kr?` &nbsp; <b>K&amp;R:</b> ${esc(s.kr)}`:""}<br>${s.url?`<a href="${esc(s.url)}" target="_blank" rel="noopener">Lepiforum: ${esc(s.url)}</a>`:""}`};
-$("siteSel").onchange=()=>{const s=S.sites[$("siteSel").value];if(!s)return;$("flur").value=s.flur||s.name;$("mtb").value=s.mtb||"";$("mtbq").value=s.q||"";$("mtbmf").value=s.mf||"";$("ort").value=s.ort||"";$("plz").value=s.plz||"";$("hmin").value=s.hmin??"";$("hmax").value=s.hmax??"";$("hab").value=s.beschreibung||s.hab||"";if(!isNaN(parseFloat(s.lat))&&!isNaN(parseFloat(s.lng)))setPos(s.lat,s.lng);else{$("lat").value="";$("lng").value="";updDms();if(marker){marker.remove();marker=null}}};
+$("siteSel").onchange=()=>{const s=S.sites[$("siteSel").value];if(!s)return;$("flur").value=s.flur||s.name;$("mtb").value=s.mtb||"";$("mtbq").value=s.q||"";$("mtbmf").value=s.mf||"";$("ort").value=s.ort||"";$("plz").value=s.plz||"";$("hmin").value=s.hmin??"";$("hmax").value=s.hmax??"";$("hab").value=s.beschreibung||s.hab||"";$("mtbHint").textContent="";if(!isNaN(parseFloat(s.lat))&&!isNaN(parseFloat(s.lng)))setPos(s.lat,s.lng,undefined,true);else{$("lat").value="";$("lng").value="";updDms();if(marker){marker.remove();marker=null}}};
 $("saveSite").onclick=()=>{const a=parseFloat($("lat").value),b=parseFloat($("lng").value);if(isNaN(a)||isNaN(b))return toast("Bitte erst einen Punkt auf der Karte wählen");const n=prompt("Name der Fundort-Vorlage:",$("flur").value);if(!n)return;
  if(S.sites.some(s=>normKey(s.name)===normKey(n)))return toast("Ein Fundort mit diesem Namen existiert bereits – bitte über „Vorlage bearbeiten“ ändern");S.sites.push({...normSite({name:n,flur:$("flur").value,mtb:$("mtb").value,q:$("mtbq").value,mf:$("mtbmf").value,ort:$("ort").value,plz:$("plz").value,lat:a,lng:b,hmin:$("hmin").value,hmax:$("hmax").value,beschreibung:$("hab").value}),nr:nextNr()});persist();renderAll();$("siteSel").value=S.sites.length-1;toast("Fundort gespeichert")};
 /* Foto */
 $("foto").onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;c.getContext("2d").drawImage(im,0,0,c.width,c.height);photo=c.toDataURL("image/jpeg",.78);$("prev").innerHTML=`<img class="thumb" src="${photo}">`};im.src=URL.createObjectURL(f)};
 /* Speichern */
 function now(){const d=new Date();$("datum").value=d.toISOString().slice(0,10);$("zeit").value=d.toTimeString().slice(0,5)}
-function clearForm(){["art","flur","mtb","mtbq","mtbmf","ort","plz","lat","lng","hmin","hmax","dms","hab","bem"].forEach(i=>$(i).value="");$("siteSel").value="";$("anz").value=1;$("artinfo").style.display="none";$("foto").value="";$("prev").innerHTML="";photo="";if(marker){marker.remove();marker=null}now()}
+function clearForm(){$("mtbHint").textContent="";["art","flur","mtb","mtbq","mtbmf","ort","plz","lat","lng","hmin","hmax","dms","hab","bem"].forEach(i=>$(i).value="");$("siteSel").value="";$("anz").value=1;$("artinfo").style.display="none";$("foto").value="";$("prev").innerHTML="";photo="";if(marker){marker.remove();marker=null}now()}
 $("reset").onclick=clearForm;
 $("save").onclick=()=>{const s=findSp($("art").value);if(!s)return toast("Bitte eine Art aus der Liste wählen (oder neu hinzufügen)");
  const a=parseFloat($("lat").value),b=parseFloat($("lng").value);if((isNaN(a)||isNaN(b))&&!$("mtb").value.trim()&&!$("flur").value.trim())return toast("Bitte Fundort auf der Karte wählen oder Fundort-Vorlage bzw. MTB angeben");
@@ -494,9 +499,11 @@ function makeObs(x){
  const s=x.sp||{},st=x.site||{};
  const la=parseCoord(x.lat??""),ln=parseCoord(x.lng??""),own=!isNaN(la)&&!isNaN(ln),sOk=!isNaN(parseFloat(st.lat))&&!isNaN(parseFloat(st.lng));
  const v=(a,b)=>isNA(a)?(b??""):String(a).trim();
+ const cla=own?la:(sOk?+st.lat:NaN),cln=own?ln:(sOk?+st.lng:NaN);let mt=[v(x.mtb,st.mtb),v(x.q,st.q),v(x.mf,st.mf)];
+ if(!mt[0]&&!mt[1]&&!mt[2]&&!isNaN(cla)){const r=mtbFromCoord(cla,cln);if(r)mt=[r.mtb,r.q,r.mf]}
  return{id:x.id||Date.now().toString(36)+(++_idc).toString(36)+Math.random().toString(36).slice(2,5),datum:x.datum||"",zeit:x.zeit||"",beobachter:x.beobachter||"",
   de:s.de||x.de||"",sci:s.sci||x.sci||"",ufam:s.ufam||"",fam:s.fam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||"",
-  flur:x.flur||st.name||"",mtb:v(x.mtb,st.mtb),q:v(x.q,st.q),mf:v(x.mf,st.mf),ort:v(x.ort,st.ort),plz:v(x.plz,st.plz),
+  flur:x.flur||st.name||"",mtb:mt[0],q:mt[1],mf:mt[2],ort:v(x.ort,st.ort),plz:v(x.plz,st.plz),
   lat:own?la:(sOk?+st.lat:""),lng:own?ln:(sOk?+st.lng:""),hmin:v(x.hmin,st.hmin),hmax:v(x.hmax,st.hmax),habitat:v(x.habitat,st.beschreibung||st.hab),
   anzahl:x.anzahl||1,stadium:normStad(x.stadium),methode:x.methode||"",bem:x.bem||"",foto:x.foto||""}}
 function mapObsRow(o){
@@ -695,7 +702,7 @@ function initMap2(){
  map2=L.map("map2").setView([52.37,9.73],10);
  const use=()=>{if(tile2)map2.removeLayer(tile2);const s=TILE2[tile2Idx];tile2=L.tileLayer(s.url,{maxZoom:19,attribution:s.attr,crossOrigin:true});tile2.addTo(map2);
   tile2.on("tileerror",()=>{if(tile2Idx<TILE2.length-1){tile2Idx++;use()}})};
- use();mark2=L.layerGroup().addTo(map2);L.control.scale({imperial:false}).addTo(map2);
+ use();baseCtl(map2);applyBase(map2,()=>tile2);mark2=L.layerGroup().addTo(map2);L.control.scale({imperial:false}).addTo(map2);
  const lg=L.control({position:"bottomleft"});lg.onAdd=()=>{const dv=L.DomUtil.create("div","legend");dv.innerHTML="● Kreisgröße = Anzahl Nachweise je Fundort";return dv};lg.addTo(map2)}
 function showAusw(){
  if(!$("a_stad").options.length)$("a_stad").innerHTML='<option value="">Alle Stadien</option>'+STAD.map(s=>`<option>${esc(s)}</option>`).join("");
@@ -722,13 +729,14 @@ $("a_pngMap").onclick=async()=>{
  toast("Karte wird als Bild erzeugt …");
  const sz=map2.getSize(),W=sz.x,H=sz.y,k=2,cv=document.createElement("canvas");cv.width=W*k;cv.height=H*k;const x=cv.getContext("2d");x.scale(k,k);
  x.fillStyle="#dfe6dd";x.fillRect(0,0,W,H);
- const z=map2.getZoom(),pb=map2.getPixelBounds(),n=2**z,src=TILE2[tile2Idx],tl=pb.min.divideBy(256).floor(),br=pb.max.divideBy(256).floor(),jobs=[];let failed=0;
- for(let tx=tl.x;tx<=br.x;tx++)for(let ty=tl.y;ty<=br.y;ty++){if(ty<0||ty>=n)continue;const wx=((tx%n)+n)%n;
-  jobs.push(new Promise(res=>{const im=new Image();im.crossOrigin="anonymous";const to=setTimeout(()=>{failed++;res()},9000);
-   im.onload=()=>{clearTimeout(to);x.drawImage(im,tx*256-pb.min.x,ty*256-pb.min.y,256,256);res()};
-   im.onerror=()=>{clearTimeout(to);failed++;res()};
-   im.src=src.url.replace("{z}",z).replace("{x}",wx).replace("{y}",ty).replace("{r}","")}))}
- await Promise.all(jobs);
+ const z=map2.getZoom(),pb=map2.getPixelBounds(),sat=mapMode==="sat",src=sat?SAT:TILE2[tile2Idx],urls=sat?[SAT.url,SATLAB.url]:[src.url],nz=Math.min(z,sat?18:19),ts=256*2**(z-nz),n=2**nz,tl=pb.min.divideBy(ts).floor(),br=pb.max.divideBy(ts).floor();let failed=0;
+ for(const u of urls){const jobs=[];
+  for(let tx=tl.x;tx<=br.x;tx++)for(let ty=tl.y;ty<=br.y;ty++){if(ty<0||ty>=n)continue;const wx=((tx%n)+n)%n;
+   jobs.push(new Promise(res=>{const im=new Image();im.crossOrigin="anonymous";const to=setTimeout(()=>{failed++;res()},9000);
+    im.onload=()=>{clearTimeout(to);x.drawImage(im,tx*ts-pb.min.x,ty*ts-pb.min.y,ts,ts);res()};
+    im.onerror=()=>{clearTimeout(to);failed++;res()};
+    im.src=u.replace("{z}",nz).replace("{x}",wx).replace("{y}",ty).replace("{r}","")}))}
+  await Promise.all(jobs)}
  for(const g of aGroups){const p=map2.latLngToContainerPoint([g.lat,g.lng]);if(p.x<-30||p.y<-30||p.x>W+30||p.y>H+30)continue;
   x.beginPath();x.arc(p.x,p.y,radOf(g.n),0,Math.PI*2);x.fillStyle="rgba(15,122,74,.65)";x.fill();x.lineWidth=1.5;x.strokeStyle="#fff";x.stroke()}
  const t=auswTitle(aData),box=(tx,ty,w,h)=>{x.fillStyle="rgba(255,255,255,.92)";x.fillRect(tx,ty,w,h)};
@@ -830,6 +838,52 @@ $("lb_print").onclick=()=>{
  if(f.over)toast(`${f.over} Etikett(en) passen auch mit kleinster Schrift nicht vollständig – bitte Größe prüfen`);
  setTimeout(()=>window.print(),80)};
 window.addEventListener("afterprint",()=>{$("lbPrint").innerHTML="";const s=$("lbPageStyle");if(s)s.remove()});
+
+/* ===== MTB / Quadrant / Minutenfeld aus Koordinaten (TK25-Raster, DHDN-Datum) ===== */
+function mtbFromCoord(lat,lng){
+ lat=parseFloat(lat);lng=parseFloat(lng);if(isNaN(lat)||isNaN(lng))return null;
+ if(lat<47.1||lat>55.95||lng<5.8||lng>15.2)return null;
+ const rad=Math.PI/180,sec=rad/3600;
+ /* WGS84 → ECEF → Helmert (DHDN→WGS84 invers) → Bessel-Breite/Länge */
+ const aW=6378137,fW=1/298.257223563,aB=6377397.155,fB=1/299.1528128,e2W=fW*(2-fW),e2B=fB*(2-fB);
+ const la=lat*rad,lo=lng*rad,N=aW/Math.sqrt(1-e2W*Math.sin(la)**2);
+ let x=N*Math.cos(la)*Math.cos(lo)-598.1,y=N*Math.cos(la)*Math.sin(lo)-73.7,z=N*(1-e2W)*Math.sin(la)-418.2;
+ const rx=.202*sec,ry=.045*sec,rz=-2.455*sec,s=6.7e-6;
+ const x2=(x+rz*y-ry*z)/(1+s),y2=(-rz*x+y+rx*z)/(1+s),z2=(ry*x-rx*y+z)/(1+s);
+ const p=Math.hypot(x2,y2);let b=Math.atan2(z2,p*(1-e2B));
+ for(let i=0;i<8;i++){const n=aB/Math.sqrt(1-e2B*Math.sin(b)**2);b=Math.atan2(z2+e2B*n*Math.sin(b),p)}
+ const B=b/rad,L=Math.atan2(y2,x2)/rad;
+ /* Raster: Reihe 01 beginnt bei 55°54' N, Spalte 01 bei 5°50' E; Blatt = 6' × 10', Quadrant = 3' × 5', Minutenfeld = 1' × 1' (3 Zeilen × 5 Spalten) */
+ const fy=(55.9-B)/0.1,fx=(L-(5+50/60))/(10/60);
+ if(fy<0||fx<0)return null;
+ const row=Math.floor(fy)+1,col=Math.floor(fx)+1;if(row>99||col>99)return null;
+ const yy=fy-Math.floor(fy),xx=fx-Math.floor(fx),q=yy<.5?(xx<.5?1:2):(xx<.5?3:4);
+ const mf=Math.min(2,Math.floor(((yy*2)%1)*3))*5+Math.min(4,Math.floor(((xx*2)%1)*5))+1;
+ return{mtb:String(row).padStart(2,"0")+String(col).padStart(2,"0"),q:String(q),mf:String(mf)}}
+
+/* ===== Kartenansicht: Karte / Satellit (Esri World Imagery + Ortsnamen) ===== */
+const SAT={url:"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",attr:"Satellit: © Esri, Maxar, Earthstar Geographics, GIS User Community"};
+const SATLAB={url:"https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"};
+function applyBase(mm,osm){
+ if(!mm||typeof L==="undefined")return;
+ if(!mm._sat){mm._sat=L.tileLayer(SAT.url,{maxZoom:19,maxNativeZoom:18,attribution:SAT.attr,crossOrigin:true,zIndex:2});mm._lab=L.tileLayer(SATLAB.url,{maxZoom:19,maxNativeZoom:18,crossOrigin:true,zIndex:3})}
+ const o=osm();
+ if(mapMode==="sat"){if(o&&mm.hasLayer(o))mm.removeLayer(o);if(!mm.hasLayer(mm._sat))mm._sat.addTo(mm);if(!mm.hasLayer(mm._lab))mm._lab.addTo(mm)}
+ else{mm.removeLayer(mm._sat);mm.removeLayer(mm._lab);if(o&&!mm.hasLayer(o))o.addTo(mm)}}
+function setBase(m){mapMode=m;try{localStorage.setItem("ikMapMode",m)}catch(e){}
+ applyBase(map,()=>tileLayer);applyBase(map2,()=>tile2);
+ document.querySelectorAll(".basesw button").forEach(b=>b.classList.toggle("on",b.dataset.m===mapMode))}
+function baseCtl(mm){const c=L.control({position:"topright"});
+ c.onAdd=()=>{const d=L.DomUtil.create("div","basesw");d.innerHTML=`<button type="button" data-m="osm" class="${mapMode==="osm"?"on":""}">Karte</button><button type="button" data-m="sat" class="${mapMode==="sat"?"on":""}">Satellit</button>`;
+  if(L.DomEvent)L.DomEvent.disableClickPropagation(d);d.addEventListener("click",e=>{const b=e.target.closest("button");if(b)setBase(b.dataset.m)});return d};
+ c.addTo(mm)}
+/* MTB / Q / MF aus Position */
+function fillMtb(la,ln){const r=mtbFromCoord(la,ln);
+ $("mtb").value=r?r.mtb:"";$("mtbq").value=r?r.q:"";$("mtbmf").value=r?r.mf:"";
+ $("mtbHint").textContent=r?`MTB ${r.mtb}, Quadrant ${r.q}, Minutenfeld ${r.mf} – aus der Position berechnet (TK25-Raster)`:"Position außerhalb des TK25-Rasters (Deutschland) – MTB/Q/MF bitte manuell eintragen"}
+const calcMtbInto=(la,ln,ids)=>{const r=mtbFromCoord(la,ln);if(!r)return toast("Koordinaten fehlen oder liegen außerhalb Deutschlands");$(ids[0]).value=r.mtb;$(ids[1]).value=r.q;$(ids[2]).value=r.mf;toast(`MTB ${r.mtb} · Q ${r.q} · MF ${r.mf}`)};
+$("m_mtbcalc").onclick=()=>calcMtbInto(mv("lat"),mv("lng"),["m_mtb","m_q","m_mf"]);
+$("o_mtbcalc").onclick=()=>calcMtbInto(ov("lat"),ov("lng"),["o_mtb","o_q","o_mf"]);
 
 /* Start */
 (async()=>{await idb();await load();mergeSeed();mergeFundeSeed();initMap();now();renderAll()})();
