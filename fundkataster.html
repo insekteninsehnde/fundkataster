@@ -56,6 +56,8 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
 .lbPage{box-sizing:border-box;overflow:hidden;break-after:page;page-break-after:always;background:#fff}.lbPage:last-child{break-after:auto;page-break-after:auto}.lbGrid{display:grid;justify-content:start;align-content:start}
 @media print{body>*:not(#lbPrint){display:none!important}html,body{height:auto!important;display:block!important;background:#fff!important}#lbPrint{position:static!important;left:auto!important}}
 .basesw{display:flex;background:#fff;border-radius:8px;box-shadow:0 2px 8px #0003;overflow:hidden}.basesw button{border:0;background:#fff;padding:7px 12px;cursor:pointer;font:inherit;font-size:13px;color:var(--tx)}.basesw button.on{background:var(--g);color:#fff;font-weight:600}
+.wxsw{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600;color:var(--g);cursor:pointer;margin:0}
+.xt{border-collapse:collapse;width:100%}.xt th{font-size:12px;color:var(--mu);text-align:left;padding:4px 6px}.xt td{padding:6px;border-top:1px solid var(--bd);vertical-align:middle}.xt .btn{padding:6px 10px;font-size:12.5px;white-space:nowrap}
 </style></head><body>
 <header>
  <div class="logo"><i>🦋</i><div><b>FalterKataster</b><span class="pill" id="stat">lokal</span><small>Insekten-Funddaten mit Fundort- und Art-Katalog – offline im Browser</small></div></div>
@@ -90,8 +92,10 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
    <div><label>Stadium</label><select id="stad"><option>Imago</option><option>Ei</option><option>Raupe/Larve</option><option>Puppe</option><option>Exuvie</option><option>Fraßspur</option></select></div>
    <div><label>Methode</label><select id="meth"><option>Tagbeobachtung</option><option>Lichtfang</option><option>Köderfang</option><option>Kescher/Fang</option><option>Aufzucht</option><option>Sonstiges</option></select></div></div>
    <div class="row c2"><div><label>Belegfoto</label><input type="file" id="foto" accept="image/*"></div><div id="prev" style="align-self:end"></div></div>
-   <label>Bemerkungen</label><textarea id="bem" placeholder="Zusätzliche Notizen zu Wetter oder Verhalten…"></textarea></div>
-  <button class="btn" id="save">Beobachtung speichern</button> <button class="btn s" id="reset">Formular leeren</button>
+   <label>Bemerkungen</label><textarea id="bem" placeholder="Zusätzliche Notizen zu Verhalten, Begleitumständen …"></textarea></div>
+  <div class="card"><h3><span>5. Wetterdaten <small style="font-weight:400;color:var(--mu)">(optional)</small></span><label class="wxsw"><input type="checkbox" id="wx_on" style="width:auto"> Wetterdaten erfassen</label></h3>
+    <div id="wxBox" style="display:none"><p class="sub" style="font-size:12px;margin:0 0 10px">Die Angaben bleiben für den nächsten Fund erhalten (gleiche Exkursion). Haken entfernen, wenn keine Wetterdaten gespeichert werden sollen.</p><div id="wxFields"></div></div></div>
+   <button class="btn" id="save">Beobachtung speichern</button> <button class="btn s" id="reset">Formular leeren</button>
   <div style="height:30px"></div>
  </div>
 </section>
@@ -101,11 +105,11 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
  <div class="grid2 cat">
   <div><div class="card"><h3><span>Arten <span id="spn" class="pill"></span></span><a id="newSp2">+ Neue Art</a></h3>
    <p class="sub" style="font-size:12px">Excel (<code>.xlsx</code>) oder CSV im Format <code>K&amp;R · trivial Name · Überfamilie · Familie · Gattungsname · Artname · Autor · RL NDS · RL NDS 2004 · RL D</code>. Bereits vorhandene Arten (gleicher wissenschaftlicher Name) werden nicht doppelt angelegt, leere Felder aber ergänzt.</p>
-   <input type="file" id="spFile" accept=".xlsx,.xls,.csv,.txt,.json" style="margin-bottom:8px"> <button class="btn s" id="exSpX2" style="margin-bottom:8px">Excel exportieren</button><input id="spFilter" placeholder="Arten filtern…"></div>
+   <input type="file" id="spFile" accept=".xlsx,.xls,.csv,.txt,.json" style="margin-bottom:8px"> <span style="display:inline-flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><button class="btn s" id="exSpX2">⬇ Excel</button><button class="btn s" id="exSpC2">⬇ CSV</button><button class="btn s" id="exSpJ2">⬇ JSON</button></span><input id="spFilter" placeholder="Arten filtern…"></div>
    <div style="max-height:55vh;overflow:auto"><table id="spTab"></table></div></div>
   <div><div class="card"><h3><span>Fundorte <span id="sin" class="pill"></span></span><a id="newSi">+ Neuer Fundort</a></h3>
    <p class="sub" style="font-size:12px">Excel (<code>.xlsx</code>) oder CSV im Format <code>Flur Bezeichnung · Breitengrad · Längengrad · MTB · Q · MF · Höhe Min · Höhe Max · Ort · PLZ · Beschreibung</code>. Koordinaten als <code>52°17'58.9"N</code> oder dezimal, <code>na.</code> = unbekannt. Gleichnamige Fundorte werden nicht doppelt angelegt (leere Felder werden ergänzt).</p>
-   <input type="file" id="siFile" accept=".xlsx,.xls,.csv,.txt,.json" style="margin-bottom:8px"> <button class="btn s" id="exSiX2" style="margin-bottom:8px">Excel exportieren</button><input id="siFilter" placeholder="Fundorte filtern…"></div>
+   <input type="file" id="siFile" accept=".xlsx,.xls,.csv,.txt,.json" style="margin-bottom:8px"> <span style="display:inline-flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><button class="btn s" id="exSiX2">⬇ Excel</button><button class="btn s" id="exSiC2">⬇ CSV</button><button class="btn s" id="exSiJ2">⬇ JSON</button><button class="btn d s" id="wipeSites2">Alle Fundorte löschen</button></span><input id="siFilter" placeholder="Fundorte filtern…"></div>
    <div style="max-height:55vh;overflow:auto"><table id="siTab"></table></div></div>
  </div></div></section>
 
@@ -127,13 +131,15 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
 <section class="tab" id="t4"><div class="full">
  <h2>Export &amp; Schnittstellen</h2><p class="sub">Funde sichern, weitergeben oder bestehende Fundlisten einlesen.</p>
  <div class="grid2">
-  <div class="card"><h3>Funde exportieren</h3><p class="sub">Daten verlassen den Browser nur über diese Dateien.</p>
-   <button class="btn" id="exCsv">CSV (Excel, ; getrennt)</button> <button class="btn s" id="exObX">Excel (mit Art- &amp; Fundortdaten)</button> <button class="btn s" id="exJson">JSON</button></div>
+  <div class="card"><h3>Daten exportieren</h3><p class="sub">Alle Tabellen in demselben Spaltenformat wie die Importdateien – Excel, CSV (Semikolon-getrennt, für Excel) und JSON lassen sich wieder einlesen. Fotos nur über das Backup.</p>
+   <table class="xt"><tr><th></th><th>Excel</th><th>CSV</th><th>JSON</th></tr>
+    <tr><td><b>Funde</b><br><small>mit Art-, Fundort- &amp; Wetterdaten</small></td><td><button class="btn s" id="exObX">⬇ .xlsx</button></td><td><button class="btn s" id="exCsv">⬇ .csv</button></td><td><button class="btn s" id="exJson">⬇ .json</button></td></tr>
+    <tr><td><b>Arten</b><br><small>Artenliste</small></td><td><button class="btn s" id="exSpX">⬇ .xlsx</button></td><td><button class="btn s" id="exSp">⬇ .csv</button></td><td><button class="btn s" id="exSpJ">⬇ .json</button></td></tr>
+    <tr><td><b>Fundorte</b><br><small>Fundortkatalog</small></td><td><button class="btn s" id="exSiX">⬇ .xlsx</button></td><td><button class="btn s" id="exSi">⬇ .csv</button></td><td><button class="btn s" id="exSiJ">⬇ .json</button></td></tr></table></div>
   <div class="card"><h3>Fundliste laden</h3><p class="sub">Excel (<code>.xlsx</code>), CSV oder JSON – z.&nbsp;B. eine zuvor exportierte <code>Funde.xlsx</code> (alle Spalten aus Artenliste und Fundorten) oder eine Liste ohne Kopfzeile: <code>Art · Stadium · Anzahl · Datum · Fundort · Beobachter · Bemerkung</code>. Funde mit bekannter ID werden aktualisiert, identische übersprungen; unbekannte Arten und Fundorte wandern in die Kataloge.</p>
    <input type="file" id="obFile" accept=".xlsx,.xls,.csv,.txt,.json"></div>
-  <div class="card"><h3>Kataloge exportieren</h3><button class="btn s" id="exSpX">Arten (Excel)</button> <button class="btn s" id="exSp">Arten (CSV)</button> <button class="btn s" id="exSiX">Fundorte (Excel)</button> <button class="btn s" id="exSi">Fundorte (CSV)</button></div>
   <div class="card"><h3>Gesamte Datenbank</h3><p class="sub">Vollständige Sicherung inkl. Fotos.</p>
-   <button class="btn s" id="exAll">Backup (JSON)</button> <button class="btn s" id="pickFolder">Datenordner verbinden</button> <button class="btn d" id="wipe">Alle Funde löschen</button><p class="sub" id="folderStatus" style="font-size:12px">Browser-Speicher aktiv. Für automatische Dateiablage bitte den Datenordner verbinden.</p></div>
+   <button class="btn s" id="exAll">Backup (JSON)</button> <button class="btn s" id="pickFolder">Datenordner verbinden</button> <button class="btn d" id="wipe">Alle Funde löschen</button> <button class="btn d" id="wipeSites">Alle Fundorte löschen</button><p class="sub" id="folderStatus" style="font-size:12px">Browser-Speicher aktiv. Für automatische Dateiablage bitte den Datenordner verbinden.</p></div>
  </div></div></section>
 </main>
 <div class="modal" id="lbModal"><div class="mbox wide"><h3>🏷 Sammlungsetiketten drucken</h3>
@@ -183,6 +189,8 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
  <div class="row c4"><div><label>Lat (Dez)</label><input id="o_lat" type="number" step="any"></div><div><label>Lng (Dez)</label><input id="o_lng" type="number" step="any"></div><div><label>Höhe Min (m)</label><input id="o_hmin" type="number"></div><div><label>Höhe Max (m)</label><input id="o_hmax" type="number"></div></div>
  <div class="row"><div><button type="button" class="btn s" id="o_mtbcalc">⟳ MTB / Q / MF aus Koordinaten berechnen</button></div></div>
  <div class="row"><div><label>Beschreibung / Habitat</label><input id="o_hab"></div></div>
+ <div class="row" style="margin-bottom:6px"><label class="wxsw" style="margin:0"><input type="checkbox" id="ow_on" style="width:auto"> ☁ Wetterdaten erfassen</label></div>
+ <div id="o_wxBox" style="display:none;margin-bottom:10px"><div id="o_wxFields"></div></div>
  <div class="row c2"><div><label>Belegfoto ersetzen</label><input type="file" id="o_foto" accept="image/*"><label style="margin-top:6px"><input type="checkbox" id="o_rmfoto" style="width:auto"> Foto entfernen</label></div><div id="o_prev" style="align-self:end"></div></div>
  <div class="mbtn"><button class="btn s" id="o_cancel">Abbrechen</button><button class="btn" id="o_save">Speichern</button></div></div></div>
 <div class="modal" id="siModal"><div class="mbox"><h3 id="m_title">Fundort bearbeiten</h3>
@@ -212,6 +220,7 @@ function mergeFundortBasis(){
   else{const s=S.sites[i];for(const k in b){if((s[k]===undefined||s[k]===null||s[k]==="")&&b[k]!=="")s[k]=b[k]}}}
  S._fb=3;return true}
 /* ===== Fundort-Helfer (Excel-Format: Flur Bezeichnung, Breitengrad, Längengrad, MTB, Q, MF, Höhe Min, Höhe Max, Ort, PLZ, Beschreibung) ===== */
+const SKIP_SHEET=/^(hinweis|legende|anleitung|info|readme)/i;
 const SITE_HEAD=["Flur Bezeichnung","Breitengrad","Längengrad","MTB","Q","MF","Höhe Min","Höhe Max","Ort","PLZ","Beschreibung"];
 const normKey=k=>String(k??"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[\s_.\-]/g,"");
 const isNA=v=>v===undefined||v===null||String(v).trim()===""||/^na\.?$/i.test(String(v).trim());
@@ -329,10 +338,10 @@ $("foto").onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image
 /* Speichern */
 function now(){const d=new Date();$("datum").value=d.toISOString().slice(0,10);$("zeit").value=d.toTimeString().slice(0,5)}
 function clearForm(){$("mtbHint").textContent="";["art","flur","mtb","mtbq","mtbmf","ort","plz","lat","lng","hmin","hmax","dms","hab","bem"].forEach(i=>$(i).value="");$("siteSel").value="";$("anz").value=1;$("artinfo").style.display="none";$("foto").value="";$("prev").innerHTML="";photo="";if(marker){marker.remove();marker=null}now()}
-$("reset").onclick=clearForm;
+$("reset").onclick=()=>{clearForm();wxReset()};
 $("save").onclick=()=>{const s=findSp($("art").value);if(!s)return toast("Bitte eine Art aus der Liste wählen (oder neu hinzufügen)");
  const a=parseFloat($("lat").value),b=parseFloat($("lng").value);if((isNaN(a)||isNaN(b))&&!$("mtb").value.trim()&&!$("flur").value.trim())return toast("Bitte Fundort auf der Karte wählen oder Fundort-Vorlage bzw. MTB angeben");
- S.obs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),datum:$("datum").value,zeit:$("zeit").value,beobachter:$("beob").value,de:s.de,sci:s.sci,fam:s.fam,ufam:s.ufam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||"",flur:$("flur").value,mtb:$("mtb").value,q:$("mtbq").value,mf:$("mtbmf").value,ort:$("ort").value,plz:$("plz").value,lat:isNaN(a)?"":a,lng:isNaN(b)?"":b,hmin:$("hmin").value,hmax:$("hmax").value,habitat:$("hab").value,anzahl:$("anz").value,stadium:$("stad").value,methode:$("meth").value,bem:$("bem").value,foto:photo});
+ S.obs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),datum:$("datum").value,zeit:$("zeit").value,beobachter:$("beob").value,de:s.de,sci:s.sci,fam:s.fam,ufam:s.ufam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||"",flur:$("flur").value,mtb:$("mtb").value,q:$("mtbq").value,mf:$("mtbmf").value,ort:$("ort").value,plz:$("plz").value,lat:isNaN(a)?"":a,lng:isNaN(b)?"":b,hmin:$("hmin").value,hmax:$("hmax").value,habitat:$("hab").value,anzahl:$("anz").value,stadium:$("stad").value,methode:$("meth").value,bem:$("bem").value,foto:photo,...($("wx_on").checked?wxNorm(wxRead("wx_")):{})});
  persist();renderAll();toast("Beobachtung gespeichert");const keep=$("beob").value;clearForm();$("beob").value=keep};
 /* Tabellen */
 function renderCat(){
@@ -346,7 +355,7 @@ $("siTab").innerHTML="<tr><th>Flur / Bezeichnung</th><th>MTB_Q_MF</th><th>Ort / 
 let obLimit=300,obSel=new Set(),obFiltered=[];
 function renderObs(){const f=$("obFilter").value.toLowerCase();
  const all=S.obs.map((o,i)=>[o,i]).filter(([o])=>[o.de,o.sci,o.flur,o.beobachter,o.datum].join(" ").toLowerCase().includes(f)).reverse(),rows=all.slice(0,obLimit);obFiltered=all;
- $("obTab").innerHTML=rows.length?"<tr><th><input type=\"checkbox\" id=\"obSelAll\" title=\"Alle angezeigten auswählen\" style=\"width:auto\"></th><th>Datum</th><th>Art</th><th>RL N/D</th><th>K&amp;R</th><th>Fundort</th><th>Koordinaten</th><th>Anz.</th><th>Stadium</th><th>Beobachter</th><th>Foto</th><th></th></tr>"+rows.map(([o,i])=>`<tr><td><input type="checkbox" data-obsel="${esc(o.id)}"${obSel.has(o.id)?" checked":""} style="width:auto"></td><td>${esc(o.datum)} ${esc(o.zeit)}</td><td>${esc(o.de)}<br><i>${esc(o.sci)}</i></td><td>${esc(o.rl_nds||"–")} / ${esc(o.rl_d||"–")}</td><td>${esc(withKr(o).kr)}</td><td>${esc(o.flur)}<br><small>${esc(mtbLabel(o))}${o.ort?" · "+esc(o.ort):""}</small></td><td>${isNaN(parseFloat(o.lat))||isNaN(parseFloat(o.lng))?"–":`${(+o.lat).toFixed(5)}, ${(+o.lng).toFixed(5)}`}</td><td>${esc(o.anzahl)}</td><td>${esc(o.stadium)}</td><td>${esc(o.beobachter)}</td><td>${o.foto?`<img class="thumb" src="${o.foto}">`:""}</td><td style="white-space:nowrap"><a href="#" data-lb="${esc(o.id)}" title="Etikett für diesen Fund drucken">🏷</a> &nbsp; <a href="#" data-edit-ob="${i}">✎ Bearbeiten</a> &nbsp; <a href="#" data-ob="${i}">✕</a></td></tr>`).join("")+(all.length>rows.length?`<tr><td colspan="12"><a href="#" id="obMore">Weitere ${Math.min(500,all.length-rows.length)} anzeigen (${rows.length} von ${all.length})</a></td></tr>`:""):"<tr><td>Noch keine Funde erfasst.</td></tr>";updSel()}
+ $("obTab").innerHTML=rows.length?"<tr><th><input type=\"checkbox\" id=\"obSelAll\" title=\"Alle angezeigten auswählen\" style=\"width:auto\"></th><th>Datum</th><th>Art</th><th>RL N/D</th><th>K&amp;R</th><th>Fundort</th><th>Koordinaten</th><th>Anz.</th><th>Stadium</th><th>Beobachter</th><th>Foto</th><th></th></tr>"+rows.map(([o,i])=>`<tr><td><input type="checkbox" data-obsel="${esc(o.id)}"${obSel.has(o.id)?" checked":""} style="width:auto"></td><td>${esc(o.datum)} ${esc(o.zeit)}${wxHas(o)?` <span title="${esc(wxText(o))}" style="cursor:help">☁</span>`:""}</td><td>${esc(o.de)}<br><i>${esc(o.sci)}</i></td><td>${esc(o.rl_nds||"–")} / ${esc(o.rl_d||"–")}</td><td>${esc(withKr(o).kr)}</td><td>${esc(o.flur)}<br><small>${esc(mtbLabel(o))}${o.ort?" · "+esc(o.ort):""}</small></td><td>${isNaN(parseFloat(o.lat))||isNaN(parseFloat(o.lng))?"–":`${(+o.lat).toFixed(5)}, ${(+o.lng).toFixed(5)}`}</td><td>${esc(o.anzahl)}</td><td>${esc(o.stadium)}</td><td>${esc(o.beobachter)}</td><td>${o.foto?`<img class="thumb" src="${o.foto}">`:""}</td><td style="white-space:nowrap"><a href="#" data-lb="${esc(o.id)}" title="Etikett für diesen Fund drucken">🏷</a> &nbsp; <a href="#" data-edit-ob="${i}">✎ Bearbeiten</a> &nbsp; <a href="#" data-ob="${i}">✕</a></td></tr>`).join("")+(all.length>rows.length?`<tr><td colspan="12"><a href="#" id="obMore">Weitere ${Math.min(500,all.length-rows.length)} anzeigen (${rows.length} von ${all.length})</a></td></tr>`:""):"<tr><td>Noch keine Funde erfasst.</td></tr>";updSel()}
 document.addEventListener("click",e=>{if(e.target.id==="obMore"){e.preventDefault();obLimit+=500;renderObs();return}const lbA=e.target.closest("a[data-lb]");if(lbA){e.preventDefault();openLabelDialog([lbA.dataset.lb]);return}const eo=e.target.closest("a[data-edit-ob]");if(eo){e.preventDefault();openObEdit(Number(eo.dataset.editOb));return}const es=e.target.closest("a[data-edit-si]");if(es){e.preventDefault();openSiteEdit(Number(es.dataset.editSi));return}const edit=e.target.closest("a[data-edit-sp]");if(edit){e.preventDefault();openSpEdit(Number(edit.dataset.editSp));return}
  const a=e.target.closest("a[data-sp],a[data-si],a[data-ob]");if(!a)return;e.preventDefault();
  if(!confirm("Eintrag löschen?"))return;if(a.dataset.sp)S.species.splice(a.dataset.sp,1);if(a.dataset.si)S.sites.splice(a.dataset.si,1);if(a.dataset.ob)S.obs.splice(a.dataset.ob,1);persist();renderAll()});
@@ -359,14 +368,14 @@ function parseCSV(t){t=t.replace(/^\uFEFF/,"");const d=(t.split("\n")[0].match(/
 const toCSV=(rows,cols)=>"\uFEFF"+[cols.join(";")].concat(rows.map(r=>cols.map(c=>{const v=String(r[c]??"");return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(";"))).join("\r\n");
 function dl(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
 const pick=(o,...k)=>{for(const x of k)if(o[x]!==undefined&&o[x]!=="")return o[x];return""};
-async function readRows(f){if(/\.xlsx?$/i.test(f.name)){const X=await loadXLSX();const wb=X.read(await f.arrayBuffer(),{type:"array"});let best=[];for(const n of wb.SheetNames){const r=X.utils.sheet_to_json(wb.Sheets[n],{defval:"",raw:false});if(r.length>best.length)best=r}return best.map(o=>Object.fromEntries(Object.entries(o).map(([k,v])=>[k.trim().toLowerCase(),typeof v==="string"?v.trim():v])))}
+async function readRows(f){if(/\.xlsx?$/i.test(f.name)){const X=await loadXLSX();const wb=X.read(await f.arrayBuffer(),{type:"array"});let best=[];for(const n of wb.SheetNames){if(SKIP_SHEET.test(n))continue;const r=X.utils.sheet_to_json(wb.Sheets[n],{defval:"",raw:false});if(r.length>best.length)best=r}return best.map(o=>Object.fromEntries(Object.entries(o).map(([k,v])=>[k.trim().toLowerCase(),typeof v==="string"?v.trim():v])))}
 const t=await f.text();if(f.name.endsWith(".json")){const j=JSON.parse(t);return Array.isArray(j)?j:j.obs||j.species||j.sites||[]}return parseCSV(t)}
 const addSp=(sci,de,fam,aut,url,x={})=>upsertSpecies(normSp({sci,de,fam,aut,url,...x}))==="new"?1:0;
 const addSi=o=>upsertSite(normSite(o))==="new"?1:0;
 $("siFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const rows=await readRows(f);let n=0,u=0,x=0,sk=0;for(const o of rows){const r=upsertSite(normSite(mapSiteRow(o)));if(r==="new")n++;else if(r==="fill")u++;else if(r==="same")x++;else sk++}persist();renderAll();toast(`${n} neue Fundorte, ${u} ergänzt, ${x} bereits vorhanden`+(sk?`, ${sk} ohne Namen übersprungen`:""))}catch(err){toast("Datei konnte nicht gelesen werden: "+err.message)}e.target.value=""};
 /* Export */
 const withKr=o=>({...o,kr:o.kr||(S.species.find(s=>s.sci==o.sci)||{}).kr||""});
-const OC=["id","datum","zeit","beobachter","de","sci","ufam","fam","rl_nds","rl_nds04","rl_d","kr","flur","mtb","q","mf","ort","plz","lat","lng","hmin","hmax","habitat","anzahl","stadium","methode","bem"];
+const OC=["id","datum","zeit","beobachter","de","sci","ufam","fam","rl_nds","rl_nds04","rl_d","kr","flur","mtb","q","mf","ort","plz","lat","lng","hmin","hmax","habitat","anzahl","stadium","methode","bem","w_temp","w_bew","w_wind","w_dir","w_nied","w_feu","w_mond","w_bem"];
 const stamp=()=>new Date().toISOString().slice(0,10);
 $("exCsv").onclick=()=>dl(`funde_${stamp()}.csv`,toCSV(S.obs.map(withKr),OC),"text/csv");
 $("exJson").onclick=()=>dl(`funde_${stamp()}.json`,JSON.stringify(S.obs.map(withKr),null,1),"application/json");
@@ -483,7 +492,7 @@ $("exSpX").onclick=exportSpXlsx;$("exSpX2").onclick=exportSpXlsx;
 $("exSp").onclick=()=>dl("arten.csv",toCSV(S.species.map(s=>{const r=spRow(s);return Object.fromEntries(SP_HEAD.map((h,i)=>[h,r[i]]))}),SP_HEAD),"text/csv");
 
 /* ===== Funde (Excel-Format ohne Kopfzeile: Art · Stadium · Anzahl · Datum · Fundort · Beobachter · Bemerkung) ===== */
-const OB_HEAD=["Datum","Uhrzeit","Beobachter","Stadium","Anzahl","Methode","Bemerkung","K&R","trivial Name","Überfamilie","Familie","Gattungsname","Artname","Autor","RL NDS","RL NDS 2004","RL D","Flur Bezeichnung","Breitengrad","Längengrad","MTB","Q","MF","Höhe Min","Höhe Max","Ort","PLZ","Beschreibung","ID"];
+const OB_HEAD=["Datum","Uhrzeit","Beobachter","Stadium","Anzahl","Methode","Bemerkung","K&R","trivial Name","Überfamilie","Familie","Gattungsname","Artname","Autor","RL NDS","RL NDS 2004","RL D","Flur Bezeichnung","Breitengrad","Längengrad","MTB","Q","MF","Höhe Min","Höhe Max","Ort","PLZ","Beschreibung","Temperatur °C","Bewölkung %","Wind Bft","Windrichtung","Niederschlag","Luftfeuchte %","Mondphase","Wetter-Bemerkung","ID"];
 const STAD=["Imago","Ei","Raupe/Larve","Puppe","Exuvie","Fraßspur"];
 const normStad=v=>{const s=String(v??"").trim();if(!s)return"Imago";const k=s.toLowerCase();if(k==="raupe"||k==="larve")return"Raupe/Larve";return STAD.find(x=>x.toLowerCase()===k)||s};
 function toISODate(v){
@@ -505,7 +514,7 @@ function makeObs(x){
   de:s.de||x.de||"",sci:s.sci||x.sci||"",ufam:s.ufam||"",fam:s.fam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||"",
   flur:x.flur||st.name||"",mtb:mt[0],q:mt[1],mf:mt[2],ort:v(x.ort,st.ort),plz:v(x.plz,st.plz),
   lat:own?la:(sOk?+st.lat:""),lng:own?ln:(sOk?+st.lng:""),hmin:v(x.hmin,st.hmin),hmax:v(x.hmax,st.hmax),habitat:v(x.habitat,st.beschreibung||st.hab),
-  anzahl:x.anzahl||1,stadium:normStad(x.stadium),methode:x.methode||"",bem:x.bem||"",foto:x.foto||""}}
+  anzahl:x.anzahl||1,stadium:normStad(x.stadium),methode:x.methode||"",bem:x.bem||"",foto:x.foto||"",...wxPick(x)}}
 function mapObsRow(o){
  const m={};for(const k in o)m[normKey(k)]=o[k];
  const p=(...a)=>{for(const x of a)if(!isNA(m[x]))return typeof m[x]==="string"?m[x].trim():m[x];return""};
@@ -514,11 +523,11 @@ function mapObsRow(o){
   fam:p("fam","familie"),ufam:p("ufam","ueberfamilie"),nds:p("rlnds"),nds04:p("rlnds04","rlnds2004"),rld:p("rld"),kr:p("kr","k&r"),
   flur:String(p("flur","fundort","flurbezeichnung")||p("ort")),mtb:p("mtb"),q:p("q"),mf:p("mf"),ort:p("ort"),plz:p("plz"),
   lat:p("lat","breite","breitengrad"),lng:p("lng","lon","laenge","laengengrad"),hmin:p("hmin","hoehemin"),hmax:p("hmax","hoehemax"),habitat:p("habitat","beschreibung"),
-  anzahl:parseInt(p("anzahl","count","individuen"))||1,stadium:String(p("stadium")),methode:String(p("methode")),bem:String(p("bem","bemerkung","bemerkungen")),foto:m.foto||""}}
+  anzahl:parseInt(p("anzahl","count","individuen"))||1,stadium:String(p("stadium")),methode:String(p("methode")),w_temp:p("temperatur°c","temperatur","temp","wtemp"),w_bew:p("bewoelkung%","bewoelkung","wbew"),w_wind:p("windbft","wind","windstaerke","wwind"),w_dir:p("windrichtung","wdir"),w_nied:p("niederschlag","wnied"),w_feu:p("luftfeuchte%","luftfeuchte","wfeu"),w_mond:p("mondphase","mond","wmond"),w_bem:p("wetterbemerkung","wetternotiz","wbem"),bem:String(p("bem","bemerkung","bemerkungen")),foto:m.foto||""}}
 async function readObsRows(f){
  if(!/\.xlsx?$/i.test(f.name))return await readRows(f);
  const X=await loadXLSX(),wb=X.read(await f.arrayBuffer(),{type:"array"});
- let best=[];for(const n of wb.SheetNames){const a=X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:""});if(a.length>best.length)best=a}
+ let best=[];for(const n of wb.SheetNames){if(SKIP_SHEET.test(n))continue;const a=X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:""});if(a.length>best.length)best=a}
  const filled=r=>r.some(c=>c!==""&&c!=null);
  if(!best.length)return[];
  const H=new Set(["datum","date","art","trivialname","deutsch","de","sci","wissenschaftlich","beobachter","observer","fundort","flur","flurbezeichnung","anzahl","stadium","bemerkung","bemerkungen","bem","lat","lng"]);
@@ -527,7 +536,8 @@ async function readObsRows(f){
  return best.filter(filled).map(r=>Object.fromEntries(keys.map((k,i)=>[k,r[i]])))}
 function sameObs(a,b){for(const k of Object.keys(b)){if(k==="foto"||k==="id")continue;
  if(k==="lat"||k==="lng"){const x=parseFloat(a[k]),y=parseFloat(b[k]);if(isNaN(x)!==isNaN(y)||(!isNaN(x)&&Math.abs(x-y)>1e-6))return false}
- else if(String(a[k]??"")!==String(b[k]??""))return false}return true}
+ else if(String(a[k]??"")!==String(b[k]??""))return false}
+ for(const k of WXK)if(String(a["w_"+k]??"")!==String(b["w_"+k]??""))return false;return true}
 function importObs(rows,prepend){
  const cnt=new Map();for(const o of S.obs){const k=obsKey(o);cnt.set(k,(cnt.get(k)||0)+1)}
  const byId=new Map(S.obs.map(o=>[o.id,o])),spDe=new Map(),spSci=new Map(),siN=new Map();
@@ -550,7 +560,7 @@ function importObs(rows,prepend){
    st=S.sites.find(x=>normKey(x.name)===normKey(o.flur));siN.set(normKey(o.flur),st)}
   const ob=makeObs({...o,sp:s,site:st});
   const ex=o.id&&byId.get(o.id);
-  if(ex){if(sameObs(ex,ob))r.dup++;else{Object.assign(ex,ob,{id:ex.id,foto:ex.foto});r.upd++}continue}
+  if(ex){if(sameObs(ex,ob))r.dup++;else{Object.assign(ex,Object.fromEntries(WXK.map(k=>["w_"+k,""])),ob,{id:ex.id,foto:ex.foto});r.upd++}continue}
   const k=obsKey(ob);if((cnt.get(k)||0)>0){cnt.set(k,cnt.get(k)-1);r.dup++;continue}
   out.push(ob)}
  S.obs=prepend?out.concat(S.obs):S.obs.concat(out);r.n=out.length;return r}
@@ -564,19 +574,21 @@ $("obFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;
  try{const r=importObs(await readObsRows(f));persist();renderAll();
   toast(`${r.n} Funde hinzugefügt, ${r.dup} bereits vorhanden`+(r.skip?`, ${r.skip} übersprungen (${[...r.miss].join(", ")}…)`:"")+(r.upd?`, ${r.upd} aktualisiert`:"")+(r.sp?`, ${r.sp} neue Arten`:"")+(r.si?`, ${r.si} neue Fundorte`:""))}
  catch(err){toast("Datei konnte nicht gelesen werden: "+err.message)}e.target.value=""};
-const exportObXlsx=async()=>{try{const X=await loadXLSX();
+const xn=v=>v===""||v===undefined||v===null?"":(isNaN(+v)?v:+v);
+function obsRows(plain){
  const spByS=new Map(S.species.map(s=>[normKey(s.sci),s])),siByN=new Map(S.sites.map(s=>[normKey(s.name),s]));
- const ser=d=>{const m=String(d||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?{t:"n",v:Date.UTC(+m[1],+m[2]-1,+m[3])/864e5+25569,z:"yyyy-mm-dd"}:(d||"")};
- const rows=S.obs.map(o=>{
+ const ser=d=>{if(plain)return d||"";const m=String(d||"").match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?{t:"n",v:Date.UTC(+m[1],+m[2]-1,+m[3])/864e5+25569,z:"yyyy-mm-dd"}:(d||"")};
+ return S.obs.map(o=>{
   const s=spByS.get(normKey(o.sci))||{},[g,a]=spParts(s.sci?s:{sci:o.sci}),st=siByN.get(normKey(o.flur))||{};
   const ok=!isNaN(parseFloat(o.lat))&&!isNaN(parseFloat(o.lng));
   const same=ok&&!isNaN(parseFloat(st.lat))&&Math.abs(st.lat-o.lat)<1e-7&&Math.abs(st.lng-o.lng)<1e-7;
   return[ser(o.datum),o.zeit||"",o.beobachter||"",o.stadium||"Imago",+o.anzahl||1,o.methode||"",o.bem||"",
    s.kr||o.kr||"",s.de||o.de||"",s.ufam||o.ufam||"",s.fam||o.fam||"",g,a,s.aut||"",s.nds||o.rl_nds||"",s.nds04||o.rl_nds04||"",s.rld||o.rl_d||"",
    o.flur||"",ok?(same&&st.breitengrad_original?st.breitengrad_original:+o.lat):"na.",ok?(same&&st.laengengrad_original?st.laengengrad_original:+o.lng):"na.",
-   o.mtb||"",o.q||"",o.mf||"",o.hmin??"",o.hmax??"",o.ort||"",o.plz||"",o.habitat||"",o.id||""]});
- const ws=X.utils.aoa_to_sheet([OB_HEAD,...rows]);
- ws["!cols"]=[12,8,28,12,8,16,40,8,32,16,28,16,16,28,8,12,6,34,14,14,7,4,5,9,9,14,8,50,16].map(w=>({wch:w}));
+   o.mtb||"",o.q||"",o.mf||"",o.hmin??"",o.hmax??"",o.ort||"",o.plz||"",o.habitat||"",xn(o.w_temp),xn(o.w_bew),xn(o.w_wind),o.w_dir||"",o.w_nied||"",xn(o.w_feu),o.w_mond||"",o.w_bem||"",o.id||""]})}
+const exportObXlsx=async()=>{try{const X=await loadXLSX();
+ const ws=X.utils.aoa_to_sheet([OB_HEAD,...obsRows(false)]);
+ ws["!cols"]=[12,8,28,12,8,16,40,8,32,16,28,16,16,28,8,12,6,34,14,14,7,4,5,9,9,14,8,50,11,11,9,11,14,11,12,28,16].map(w=>({wch:w}));
  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,"Tabelle1");X.writeFile(wb,"Funde.xlsx")}
  catch(err){toast(err.message+" – exportiere stattdessen CSV");$("exCsv").click()}};
 $("exObX").onclick=exportObXlsx;
@@ -595,7 +607,7 @@ function openObEdit(i){
  obOrig={lat:num(o.lat),lng:num(o.lng)};
  const v={datum:o.datum||"",zeit:o.zeit||"",beob:o.beobachter||"",art:`${o.de||o.sci} (${o.sci})`,anz:o.anzahl||1,meth:o.methode||"",bem:o.bem||"",
   flur:o.flur||"",ort:o.ort||"",mtb:o.mtb||"",q:o.q||"",mf:o.mf||"",plz:o.plz||"",lat:obOrig.lat,lng:obOrig.lng,hmin:o.hmin??"",hmax:o.hmax??"",hab:o.habitat||""};
- for(const k in v)$("o_"+k).value=v[k];
+ for(const k in v)$("o_"+k).value=v[k];wxWrite("ow_",o);$("ow_on").checked=wxHas(o);wxToggle("ow_on","o_wxBox");
  $("o_prev").innerHTML=o.foto?`<img class="thumb" src="${o.foto}">`:"";$("o_rmfoto").checked=false;$("o_foto").value="";
  $("obModal").classList.add("on");$("o_art").focus()}
 $("o_site").onchange=()=>{const s=S.sites[$("o_site").value];if(!s)return;
@@ -618,7 +630,7 @@ $("o_save").onclick=()=>{
   lat:ov("lat")===obOrig.lat?o.lat:(hasLa?la:""),lng:ov("lng")===obOrig.lng?o.lng:(hasLn?ln:"")};
  if(s)Object.assign(n,{de:s.de,sci:s.sci,ufam:s.ufam||"",fam:s.fam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||""});
  if(obPhoto!==undefined)n.foto=obPhoto;else if($("o_rmfoto").checked)n.foto="";
- Object.assign(o,n);persist();renderAll();closeObModal();toast("Fund aktualisiert")};
+ Object.assign(n,$("ow_on").checked?wxNorm(wxRead("ow_")):wxNorm({}));Object.assign(o,n);persist();renderAll();closeObModal();toast("Fund aktualisiert")};
 
 /* ===== Auswertung: Karte + Nachweise pro Kalenderwoche ===== */
 const STAD_COL={"Imago":"#0f7a4a","Raupe/Larve":"#e0a100","Ei":"#4f86e8","Puppe":"#8e44ad","Exuvie":"#7f8c8d","Fraßspur":"#b3261e"};
@@ -884,6 +896,58 @@ function fillMtb(la,ln){const r=mtbFromCoord(la,ln);
 const calcMtbInto=(la,ln,ids)=>{const r=mtbFromCoord(la,ln);if(!r)return toast("Koordinaten fehlen oder liegen außerhalb Deutschlands");$(ids[0]).value=r.mtb;$(ids[1]).value=r.q;$(ids[2]).value=r.mf;toast(`MTB ${r.mtb} · Q ${r.q} · MF ${r.mf}`)};
 $("m_mtbcalc").onclick=()=>calcMtbInto(mv("lat"),mv("lng"),["m_mtb","m_q","m_mf"]);
 $("o_mtbcalc").onclick=()=>calcMtbInto(ov("lat"),ov("lng"),["o_mtb","o_q","o_mf"]);
+
+/* ===== Wetterdaten (optional) ===== */
+const WXK=["temp","bew","wind","dir","nied","feu","mond","bem"];
+const WX={wind:["0 – Windstill","1 – leiser Zug","2 – leichte Brise","3 – schwache Brise","4 – mäßige Brise","5 – frische Brise","6 – starker Wind","7 – steifer Wind","8 – stürmischer Wind","9 – Sturm","10 – schwerer Sturm","11 – orkanartiger Sturm","12 – Orkan"],
+ dir:["N","NO","O","SO","S","SW","W","NW"],nied:["kein","Nieselregen","Regen","Schauer","Gewitter","Schnee/Graupel"],mond:["Neumond","zunehmend","Vollmond","abnehmend"]};
+function wxFields(p){
+ const sel=(id,l,opts)=>`<div><label>${l}</label><select id="${p}${id}"><option value="">–</option>${opts.map((o,i)=>`<option value="${id==="wind"?i:o}">${o}</option>`).join("")}</select></div>`;
+ return`<div class="row c3"><div><label>Temperatur (°C)</label><input id="${p}temp" type="number" step="0.5" placeholder="z. B. 18,5"></div><div><label>Bewölkung (%)</label><input id="${p}bew" type="number" min="0" max="100" step="5" placeholder="0 = wolkenlos"></div><div><label>Luftfeuchte (%)</label><input id="${p}feu" type="number" min="0" max="100"></div></div>
+ <div class="row c3">${sel("wind","Wind (Beaufort)",WX.wind)}${sel("dir","Windrichtung",WX.dir)}${sel("nied","Niederschlag",WX.nied)}</div>
+ <div class="row c2" style="margin-bottom:0">${sel("mond","Mondphase (Lichtfang)",WX.mond)}<div><label>Wetter-Bemerkung</label><input id="${p}bem" placeholder="z. B. schwül, nach Regenfall"></div></div>`}
+$("wxFields").innerHTML=wxFields("wx_");$("o_wxFields").innerHTML=wxFields("ow_");
+const wxHas=o=>WXK.some(k=>o["w_"+k]!==undefined&&o["w_"+k]!==null&&String(o["w_"+k])!=="");
+const wxRead=p=>Object.fromEntries(WXK.map(k=>["w_"+k,$(p+k).value.trim()]));
+const wxWrite=(p,o)=>WXK.forEach(k=>{const v=o["w_"+k];$(p+k).value=v===undefined||v===null?"":String(v)});
+function wxNorm(x){
+ const s=v=>v===undefined||v===null?"":String(v).trim(),r={};
+ r.w_temp=s(x.w_temp).replace(",",".");r.w_bew=s(x.w_bew).replace(/\s*%$/,"");r.w_feu=s(x.w_feu).replace(/\s*%$/,"");
+ const w=s(x.w_wind),m=w.match(/^(\d{1,2})/);r.w_wind=m?String(Math.min(12,+m[1])):w;
+ const d=s(x.w_dir).toUpperCase();r.w_dir=({NE:"NO",E:"O",SE:"SO",NNE:"NO",ENE:"O"})[d]||d;
+ r.w_nied=s(x.w_nied);r.w_mond=s(x.w_mond);r.w_bem=s(x.w_bem);return r}
+function wxText(o){
+ const p=[];if(o.w_temp!==""&&o.w_temp!=null)p.push(`${String(o.w_temp).replace(".",",")} °C`);
+ if(o.w_bew!==""&&o.w_bew!=null)p.push(`Bewölkung ${o.w_bew} %`);
+ if(o.w_wind!==""&&o.w_wind!=null)p.push(`Wind ${o.w_wind} Bft${o.w_dir?" "+o.w_dir:""}`);else if(o.w_dir)p.push(`Wind aus ${o.w_dir}`);
+ if(o.w_nied)p.push(o.w_nied);if(o.w_feu!==""&&o.w_feu!=null)p.push(`Luftfeuchte ${o.w_feu} %`);if(o.w_mond)p.push(`Mond: ${o.w_mond}`);if(o.w_bem)p.push(o.w_bem);
+ return p.join(" · ")}
+function wxPick(x){const n=wxNorm(x);return wxHas(n)?n:{}}
+const wxToggle=(cb,box)=>{$(box).style.display=$(cb).checked?"block":"none"};
+$("wx_on").onchange=()=>wxToggle("wx_on","wxBox");
+$("ow_on").onchange=()=>wxToggle("ow_on","o_wxBox");
+function wxReset(){$("wx_on").checked=false;wxToggle("wx_on","wxBox");WXK.forEach(k=>$("wx_"+k).value="")}
+
+/* ===== Einheitlicher Export: Excel · CSV · JSON (gleiches Spaltenformat, wieder importierbar) ===== */
+const tblObjs=(head,rows)=>rows.map(r=>Object.fromEntries(head.map((h,i)=>[h,r[i]])));
+const TBL={
+ obs:{n:"funde",head:OB_HEAD,rows:()=>obsRows(true),x:()=>exportObXlsx()},
+ sp:{n:"arten",head:SP_HEAD,rows:()=>S.species.map(spRow),x:()=>exportSpXlsx()},
+ si:{n:"fundorte",head:SITE_HEAD,rows:()=>S.sites.map(siteRow),x:()=>exportSitesXlsx()}};
+function exportTbl(k,fmt){
+ const T=TBL[k];if(fmt==="x")return T.x();
+ if(!T.rows().length)return toast("Keine Daten zum Exportieren vorhanden");
+ const o=tblObjs(T.head,T.rows());
+ if(fmt==="c")dl(`${T.n}_${stamp()}.csv`,toCSV(o,T.head),"text/csv");
+ else dl(`${T.n}_${stamp()}.json`,JSON.stringify(o,null,1),"application/json")}
+[["obs","exObX","exCsv","exJson"],["sp","exSpX","exSp","exSpJ"],["si","exSiX","exSi","exSiJ"],["sp","exSpX2","exSpC2","exSpJ2"],["si","exSiX2","exSiC2","exSiJ2"]]
+ .forEach(([k,x,c,j])=>{$(x).onclick=()=>exportTbl(k,"x");$(c).onclick=()=>exportTbl(k,"c");$(j).onclick=()=>exportTbl(k,"j")});
+/* ===== Alle Fundorte löschen ===== */
+function wipeSites(){
+ const n=S.sites.length;if(!n)return toast("Es sind keine Fundorte vorhanden");
+ if(!confirm(`Wirklich alle ${n} Fundorte löschen?\n\nBereits erfasste Funde bleiben erhalten (sie behalten ihre Fundortangaben). Arten bleiben unverändert.\nTipp: Vorher die Fundorte als Excel exportieren.`))return;
+ S.sites=[];persist();renderAll();toast(`${n} Fundorte gelöscht`)}
+$("wipeSites").onclick=wipeSites;$("wipeSites2").onclick=wipeSites;
 
 /* Start */
 (async()=>{await idb();await load();mergeSeed();mergeFundeSeed();initMap();now();renderAll()})();
