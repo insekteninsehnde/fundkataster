@@ -58,6 +58,7 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
 .basesw{display:flex;background:#fff;border-radius:8px;box-shadow:0 2px 8px #0003;overflow:hidden}.basesw button{border:0;background:#fff;padding:7px 12px;cursor:pointer;font:inherit;font-size:13px;color:var(--tx)}.basesw button.on{background:var(--g);color:#fff;font-weight:600}
 .wxsw{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:600;color:var(--g);cursor:pointer;margin:0}
 .xt{border-collapse:collapse;width:100%}.xt th{font-size:12px;color:var(--mu);text-align:left;padding:4px 6px}.xt td{padding:6px;border-top:1px solid var(--bd);vertical-align:middle}.xt .btn{padding:6px 10px;font-size:12.5px;white-space:nowrap}
+.uns{color:#b3261e}.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chip{display:inline-flex;gap:5px;align-items:center;background:#fff3e0;border:1px solid #f0c987;border-radius:14px;padding:3px 10px;font-size:12px}.chip a{color:#b3261e;text-decoration:none;font-weight:700;margin-left:2px}
 </style></head><body>
 <header>
  <div class="logo"><i>🦋</i><div><b>FalterKataster</b><span class="pill" id="stat">lokal</span><small>Insekten-Funddaten mit Fundort- und Art-Katalog – offline im Browser</small></div></div>
@@ -78,7 +79,9 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
    <div><label>Datum</label><input type="date" id="datum"></div><div><label>Uhrzeit</label><input type="time" id="zeit"></div><div><label>Beobachter</label><input id="beob" placeholder="Name"></div></div></div>
   <div class="card"><h3><span id="h2t">2. Art-Auswahl</span><span><a id="editSp">✎ Art bearbeiten</a> &nbsp; <a id="newSp">+ Neue Art hinzufügen</a></span></h3>
    <label>Art (Suche nach dt. oder wiss. Namen)</label><input id="art" list="spl" placeholder="Tippen zum Suchen…" autocomplete="off"><datalist id="spl"></datalist>
-   <div class="info" id="artinfo"></div></div>
+   <div class="info" id="artinfo"></div>
+   <label class="wxsw" style="margin:12px 0 0"><input type="checkbox" id="u_on" style="width:auto"> ⚠ Unsichere Artbestimmung – weitere Arten angeben</label>
+   <div id="u_box" style="display:none;margin-top:8px"><div id="u_fields"></div></div></div>
   <div class="card"><h3><span id="h3t">3. Fundort</span><span><a id="editSite">✎ Vorlage bearbeiten</a> &nbsp; <a id="saveSite">+ Neuen Fundort speichern</a></span></h3>
    <label>Fundort-Vorlage auswählen</label><select id="siteSel" style="margin-bottom:10px"></select>
    <div class="row c2"><div><label>Flur / Bezeichnung</label><input id="flur" placeholder="z.B. Mergelkippe Bolzum"></div><div><label>Ort</label><input id="ort" placeholder="z.B. Sehnde"></div></div>
@@ -127,6 +130,18 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
   <div class="sub" id="a_sum" style="margin:10px 0 0"></div></div>
  <div class="card"><h3>Fundkarte</h3><div id="map2"></div></div>
  <div class="card"><h3>Nachweise pro Kalenderwoche</h3><div style="position:relative"><canvas id="a_chart" style="width:100%;height:auto;display:block"></canvas><div id="a_tip"></div></div></div>
+ <div class="card"><h3>📄 Fundbericht (PDF)</h3>
+  <p class="sub" style="margin-bottom:10px">Listet alle Arten eines Tages oder Zeitraums mit Anzahl auf – optional mit Einzelfunden, Kopfzeile und Quellenangaben.</p>
+  <div class="row c4"><div><label>Von</label><input type="date" id="r_von"></div><div><label>Bis (leer = nur dieser Tag)</label><input type="date" id="r_bis"></div>
+   <div style="grid-column:span 2;align-self:end;display:flex;gap:6px;flex-wrap:wrap"><button class="btn s" id="r_today" type="button">Heute</button><button class="btn s" id="r_last" type="button">Letzter Fundtag</button><button class="btn s" id="r_7" type="button">Letzte 7 Tage</button><button class="btn s" id="r_year" type="button">Dieses Jahr</button></div></div>
+  <div class="row c2"><div><label>Berichtstitel</label><input id="r_title" placeholder="Fundbericht"></div><div><label>Artenliste sortieren nach</label><select id="r_sort"><option value="n">Anzahl der Individuen (absteigend)</option><option value="sci">Wissenschaftlicher Name</option><option value="de">Deutscher Name</option><option value="kr">Systematik (K&amp;R-Nummer)</option></select></div></div>
+  <div class="row"><div><label>Head / Kopfzeile (erscheint oben im Bericht, mehrzeilig möglich)</label><textarea id="r_head" rows="3" placeholder="z. B. Arbeitsgemeinschaft Insekten Niedersachsen&#10;Musterstraße 1 · 12345 Musterstadt · kontakt@beispiel.de"></textarea></div></div>
+  <div class="row"><div><label>Quellen (erscheinen am Ende des Berichts)</label><textarea id="r_quellen" rows="3" placeholder="z. B. Eigene Beobachtungen; Artenliste und Systematik nach Karsholt &amp; Razowski; Rote Liste Niedersachsen (2004) …"></textarea></div></div>
+  <div class="row" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr))">
+   <label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="r_detail" style="width:auto"> Einzelfunde auflisten</label>
+   <label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="r_bem" style="width:auto"> Bemerkungen anzeigen</label>
+   <label style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="r_wetter" style="width:auto"> Wetterdaten anzeigen</label></div>
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn" id="r_pdf" type="button">📄 Fundbericht als PDF erstellen</button><span class="sub" id="r_info" style="margin:0"></span></div></div>
 </div></section>
 <section class="tab" id="t4"><div class="full">
  <h2>Export &amp; Schnittstellen</h2><p class="sub">Funde sichern, weitergeben oder bestehende Fundlisten einlesen.</p>
@@ -180,6 +195,8 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
 <div class="modal" id="obModal"><div class="mbox"><h3>Fund bearbeiten</h3>
  <div class="row c3"><div><label>Datum</label><input id="o_datum" type="date"></div><div><label>Uhrzeit</label><input id="o_zeit" type="time"></div><div><label>Beobachter</label><input id="o_beob"></div></div>
  <div class="row"><div><label>Art (Suche nach dt. oder wiss. Namen)</label><input id="o_art" list="spl" autocomplete="off"></div></div>
+ <div class="row" style="margin-bottom:6px"><label class="wxsw" style="margin:0"><input type="checkbox" id="ou_on" style="width:auto"> ⚠ Unsichere Artbestimmung – weitere Arten</label></div>
+ <div id="ou_box" style="display:none;margin-bottom:10px"><div id="ou_fields"></div></div>
  <div class="row c3"><div><label>Anzahl</label><input id="o_anz" type="number" min="1"></div><div><label>Stadium</label><select id="o_stad"></select></div><div><label>Methode</label><input id="o_meth" list="o_methl"><datalist id="o_methl"><option>Tagbeobachtung</option><option>Lichtfang</option><option>Köderfang</option><option>Kescher/Fang</option><option>Aufzucht</option><option>Sonstiges</option></datalist></div></div>
  <div class="row"><div><label>Bemerkungen</label><textarea id="o_bem"></textarea></div></div>
  <h3 style="margin-top:6px;font-size:13px">Fundort</h3>
@@ -337,11 +354,11 @@ $("saveSite").onclick=()=>{const a=parseFloat($("lat").value),b=parseFloat($("ln
 $("foto").onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*k;c.height=im.height*k;c.getContext("2d").drawImage(im,0,0,c.width,c.height);photo=c.toDataURL("image/jpeg",.78);$("prev").innerHTML=`<img class="thumb" src="${photo}">`};im.src=URL.createObjectURL(f)};
 /* Speichern */
 function now(){const d=new Date();$("datum").value=d.toISOString().slice(0,10);$("zeit").value=d.toTimeString().slice(0,5)}
-function clearForm(){$("mtbHint").textContent="";["art","flur","mtb","mtbq","mtbmf","ort","plz","lat","lng","hmin","hmax","dms","hab","bem"].forEach(i=>$(i).value="");$("siteSel").value="";$("anz").value=1;$("artinfo").style.display="none";$("foto").value="";$("prev").innerHTML="";photo="";if(marker){marker.remove();marker=null}now()}
+function clearForm(){uReset();$("mtbHint").textContent="";["art","flur","mtb","mtbq","mtbmf","ort","plz","lat","lng","hmin","hmax","dms","hab","bem"].forEach(i=>$(i).value="");$("siteSel").value="";$("anz").value=1;$("artinfo").style.display="none";$("foto").value="";$("prev").innerHTML="";photo="";if(marker){marker.remove();marker=null}now()}
 $("reset").onclick=()=>{clearForm();wxReset()};
 $("save").onclick=()=>{const s=findSp($("art").value);if(!s)return toast("Bitte eine Art aus der Liste wählen (oder neu hinzufügen)");
  const a=parseFloat($("lat").value),b=parseFloat($("lng").value);if((isNaN(a)||isNaN(b))&&!$("mtb").value.trim()&&!$("flur").value.trim())return toast("Bitte Fundort auf der Karte wählen oder Fundort-Vorlage bzw. MTB angeben");
- S.obs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),datum:$("datum").value,zeit:$("zeit").value,beobachter:$("beob").value,de:s.de,sci:s.sci,fam:s.fam,ufam:s.ufam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||"",flur:$("flur").value,mtb:$("mtb").value,q:$("mtbq").value,mf:$("mtbmf").value,ort:$("ort").value,plz:$("plz").value,lat:isNaN(a)?"":a,lng:isNaN(b)?"":b,hmin:$("hmin").value,hmax:$("hmax").value,habitat:$("hab").value,anzahl:$("anz").value,stadium:$("stad").value,methode:$("meth").value,bem:$("bem").value,foto:photo,...($("wx_on").checked?wxNorm(wxRead("wx_")):{})});
+ S.obs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),datum:$("datum").value,zeit:$("zeit").value,beobachter:$("beob").value,de:s.de,sci:s.sci,fam:s.fam,ufam:s.ufam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||"",flur:$("flur").value,mtb:$("mtb").value,q:$("mtbq").value,mf:$("mtbmf").value,ort:$("ort").value,plz:$("plz").value,lat:isNaN(a)?"":a,lng:isNaN(b)?"":b,hmin:$("hmin").value,hmax:$("hmax").value,habitat:$("hab").value,anzahl:$("anz").value,stadium:$("stad").value,methode:$("meth").value,bem:setUns($("bem").value,$("u_on").checked),foto:photo,...($("u_on").checked?{unsicher:true,alt:ALT.u_.map(a=>({...a}))}:{}),...($("wx_on").checked?wxNorm(wxRead("wx_")):{})});
  persist();renderAll();toast("Beobachtung gespeichert");const keep=$("beob").value;clearForm();$("beob").value=keep};
 /* Tabellen */
 function renderCat(){
@@ -355,8 +372,8 @@ $("siTab").innerHTML="<tr><th>Flur / Bezeichnung</th><th>MTB_Q_MF</th><th>Ort / 
 let obLimit=300,obSel=new Set(),obFiltered=[];
 function renderObs(){const f=$("obFilter").value.toLowerCase();
  const all=S.obs.map((o,i)=>[o,i]).filter(([o])=>[o.de,o.sci,o.flur,o.beobachter,o.datum].join(" ").toLowerCase().includes(f)).reverse(),rows=all.slice(0,obLimit);obFiltered=all;
- $("obTab").innerHTML=rows.length?"<tr><th><input type=\"checkbox\" id=\"obSelAll\" title=\"Alle angezeigten auswählen\" style=\"width:auto\"></th><th>Datum</th><th>Art</th><th>RL N/D</th><th>K&amp;R</th><th>Fundort</th><th>Koordinaten</th><th>Anz.</th><th>Stadium</th><th>Beobachter</th><th>Foto</th><th></th></tr>"+rows.map(([o,i])=>`<tr><td><input type="checkbox" data-obsel="${esc(o.id)}"${obSel.has(o.id)?" checked":""} style="width:auto"></td><td>${esc(o.datum)} ${esc(o.zeit)}${wxHas(o)?` <span title="${esc(wxText(o))}" style="cursor:help">☁</span>`:""}</td><td>${esc(o.de)}<br><i>${esc(o.sci)}</i></td><td>${esc(o.rl_nds||"–")} / ${esc(o.rl_d||"–")}</td><td>${esc(withKr(o).kr)}</td><td>${esc(o.flur)}<br><small>${esc(mtbLabel(o))}${o.ort?" · "+esc(o.ort):""}</small></td><td>${isNaN(parseFloat(o.lat))||isNaN(parseFloat(o.lng))?"–":`${(+o.lat).toFixed(5)}, ${(+o.lng).toFixed(5)}`}</td><td>${esc(o.anzahl)}</td><td>${esc(o.stadium)}</td><td>${esc(o.beobachter)}</td><td>${o.foto?`<img class="thumb" src="${o.foto}">`:""}</td><td style="white-space:nowrap"><a href="#" data-lb="${esc(o.id)}" title="Etikett für diesen Fund drucken">🏷</a> &nbsp; <a href="#" data-edit-ob="${i}">✎ Bearbeiten</a> &nbsp; <a href="#" data-ob="${i}">✕</a></td></tr>`).join("")+(all.length>rows.length?`<tr><td colspan="12"><a href="#" id="obMore">Weitere ${Math.min(500,all.length-rows.length)} anzeigen (${rows.length} von ${all.length})</a></td></tr>`:""):"<tr><td>Noch keine Funde erfasst.</td></tr>";updSel()}
-document.addEventListener("click",e=>{if(e.target.id==="obMore"){e.preventDefault();obLimit+=500;renderObs();return}const lbA=e.target.closest("a[data-lb]");if(lbA){e.preventDefault();openLabelDialog([lbA.dataset.lb]);return}const eo=e.target.closest("a[data-edit-ob]");if(eo){e.preventDefault();openObEdit(Number(eo.dataset.editOb));return}const es=e.target.closest("a[data-edit-si]");if(es){e.preventDefault();openSiteEdit(Number(es.dataset.editSi));return}const edit=e.target.closest("a[data-edit-sp]");if(edit){e.preventDefault();openSpEdit(Number(edit.dataset.editSp));return}
+ $("obTab").innerHTML=rows.length?"<tr><th><input type=\"checkbox\" id=\"obSelAll\" title=\"Alle angezeigten auswählen\" style=\"width:auto\"></th><th>Datum</th><th>Art</th><th>RL N/D</th><th>K&amp;R</th><th>Fundort</th><th>Koordinaten</th><th>Anz.</th><th>Stadium</th><th>Beobachter</th><th>Foto</th><th></th></tr>"+rows.map(([o,i])=>`<tr><td><input type="checkbox" data-obsel="${esc(o.id)}"${obSel.has(o.id)?" checked":""} style="width:auto"></td><td>${esc(o.datum)} ${esc(o.zeit)}${wxHas(o)?` <span title="${esc(wxText(o))}" style="cursor:help">☁</span>`:""}</td><td>${esc(o.de)}<br><i>${esc(o.sci)}</i>${o.unsicher?`<br><small class="uns">⚠ ${UNS}${o.alt&&o.alt.length?": "+esc(altText(o)):""}</small>`:""}</td><td>${esc(o.rl_nds||"–")} / ${esc(o.rl_d||"–")}</td><td>${esc(withKr(o).kr)}</td><td>${esc(o.flur)}<br><small>${esc(mtbLabel(o))}${o.ort?" · "+esc(o.ort):""}</small></td><td>${isNaN(parseFloat(o.lat))||isNaN(parseFloat(o.lng))?"–":`${(+o.lat).toFixed(5)}, ${(+o.lng).toFixed(5)}`}</td><td>${esc(o.anzahl)}</td><td>${esc(o.stadium)}</td><td>${esc(o.beobachter)}</td><td>${o.foto?`<img class="thumb" src="${o.foto}">`:""}</td><td style="white-space:nowrap"><a href="#" data-lb="${esc(o.id)}" title="Etikett für diesen Fund drucken">🏷</a> &nbsp; <a href="#" data-edit-ob="${i}">✎ Bearbeiten</a> &nbsp; <a href="#" data-ob="${i}">✕</a></td></tr>`).join("")+(all.length>rows.length?`<tr><td colspan="12"><a href="#" id="obMore">Weitere ${Math.min(500,all.length-rows.length)} anzeigen (${rows.length} von ${all.length})</a></td></tr>`:""):"<tr><td>Noch keine Funde erfasst.</td></tr>";updSel()}
+document.addEventListener("click",e=>{const ad=e.target.closest("a[data-altdel]");if(ad){e.preventDefault();const[pp,ii]=ad.dataset.altdel.split(":");ALT[pp].splice(+ii,1);altRender(pp);return}if(e.target.id==="obMore"){e.preventDefault();obLimit+=500;renderObs();return}const lbA=e.target.closest("a[data-lb]");if(lbA){e.preventDefault();openLabelDialog([lbA.dataset.lb]);return}const eo=e.target.closest("a[data-edit-ob]");if(eo){e.preventDefault();openObEdit(Number(eo.dataset.editOb));return}const es=e.target.closest("a[data-edit-si]");if(es){e.preventDefault();openSiteEdit(Number(es.dataset.editSi));return}const edit=e.target.closest("a[data-edit-sp]");if(edit){e.preventDefault();openSpEdit(Number(edit.dataset.editSp));return}
  const a=e.target.closest("a[data-sp],a[data-si],a[data-ob]");if(!a)return;e.preventDefault();
  if(!confirm("Eintrag löschen?"))return;if(a.dataset.sp)S.species.splice(a.dataset.sp,1);if(a.dataset.si)S.sites.splice(a.dataset.si,1);if(a.dataset.ob)S.obs.splice(a.dataset.ob,1);persist();renderAll()});
 ["spFilter","siFilter","obFilter"].forEach(i=>$(i).oninput=()=>{obLimit=300;renderCat();renderObs()});
@@ -492,7 +509,7 @@ $("exSpX").onclick=exportSpXlsx;$("exSpX2").onclick=exportSpXlsx;
 $("exSp").onclick=()=>dl("arten.csv",toCSV(S.species.map(s=>{const r=spRow(s);return Object.fromEntries(SP_HEAD.map((h,i)=>[h,r[i]]))}),SP_HEAD),"text/csv");
 
 /* ===== Funde (Excel-Format ohne Kopfzeile: Art · Stadium · Anzahl · Datum · Fundort · Beobachter · Bemerkung) ===== */
-const OB_HEAD=["Datum","Uhrzeit","Beobachter","Stadium","Anzahl","Methode","Bemerkung","K&R","trivial Name","Überfamilie","Familie","Gattungsname","Artname","Autor","RL NDS","RL NDS 2004","RL D","Flur Bezeichnung","Breitengrad","Längengrad","MTB","Q","MF","Höhe Min","Höhe Max","Ort","PLZ","Beschreibung","Temperatur °C","Bewölkung %","Wind Bft","Windrichtung","Niederschlag","Luftfeuchte %","Mondphase","Wetter-Bemerkung","ID"];
+const OB_HEAD=["Datum","Uhrzeit","Beobachter","Stadium","Anzahl","Methode","Bemerkung","K&R","trivial Name","Überfamilie","Familie","Gattungsname","Artname","Autor","RL NDS","RL NDS 2004","RL D","Flur Bezeichnung","Breitengrad","Längengrad","MTB","Q","MF","Höhe Min","Höhe Max","Ort","PLZ","Beschreibung","Temperatur °C","Bewölkung %","Wind Bft","Windrichtung","Niederschlag","Luftfeuchte %","Mondphase","Wetter-Bemerkung","Weitere Arten (unsicher)","ID"];
 const STAD=["Imago","Ei","Raupe/Larve","Puppe","Exuvie","Fraßspur"];
 const normStad=v=>{const s=String(v??"").trim();if(!s)return"Imago";const k=s.toLowerCase();if(k==="raupe"||k==="larve")return"Raupe/Larve";return STAD.find(x=>x.toLowerCase()===k)||s};
 function toISODate(v){
@@ -514,7 +531,7 @@ function makeObs(x){
   de:s.de||x.de||"",sci:s.sci||x.sci||"",ufam:s.ufam||"",fam:s.fam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||"",
   flur:x.flur||st.name||"",mtb:mt[0],q:mt[1],mf:mt[2],ort:v(x.ort,st.ort),plz:v(x.plz,st.plz),
   lat:own?la:(sOk?+st.lat:""),lng:own?ln:(sOk?+st.lng:""),hmin:v(x.hmin,st.hmin),hmax:v(x.hmax,st.hmax),habitat:v(x.habitat,st.beschreibung||st.hab),
-  anzahl:x.anzahl||1,stadium:normStad(x.stadium),methode:x.methode||"",bem:x.bem||"",foto:x.foto||"",...wxPick(x)}}
+  anzahl:x.anzahl||1,stadium:normStad(x.stadium),methode:x.methode||"",bem:(x.altArr&&x.altArr.length?setUns(x.bem,true):(x.bem||"")),foto:x.foto||"",...wxPick(x),...unsPick(x)}}
 function mapObsRow(o){
  const m={};for(const k in o)m[normKey(k)]=o[k];
  const p=(...a)=>{for(const x of a)if(!isNA(m[x]))return typeof m[x]==="string"?m[x].trim():m[x];return""};
@@ -523,7 +540,7 @@ function mapObsRow(o){
   fam:p("fam","familie"),ufam:p("ufam","ueberfamilie"),nds:p("rlnds"),nds04:p("rlnds04","rlnds2004"),rld:p("rld"),kr:p("kr","k&r"),
   flur:String(p("flur","fundort","flurbezeichnung")||p("ort")),mtb:p("mtb"),q:p("q"),mf:p("mf"),ort:p("ort"),plz:p("plz"),
   lat:p("lat","breite","breitengrad"),lng:p("lng","lon","laenge","laengengrad"),hmin:p("hmin","hoehemin"),hmax:p("hmax","hoehemax"),habitat:p("habitat","beschreibung"),
-  anzahl:parseInt(p("anzahl","count","individuen"))||1,stadium:String(p("stadium")),methode:String(p("methode")),w_temp:p("temperatur°c","temperatur","temp","wtemp"),w_bew:p("bewoelkung%","bewoelkung","wbew"),w_wind:p("windbft","wind","windstaerke","wwind"),w_dir:p("windrichtung","wdir"),w_nied:p("niederschlag","wnied"),w_feu:p("luftfeuchte%","luftfeuchte","wfeu"),w_mond:p("mondphase","mond","wmond"),w_bem:p("wetterbemerkung","wetternotiz","wbem"),bem:String(p("bem","bemerkung","bemerkungen")),foto:m.foto||""}}
+  anzahl:parseInt(p("anzahl","count","individuen"))||1,stadium:String(p("stadium")),methode:String(p("methode")),w_temp:p("temperatur°c","temperatur","temp","wtemp"),w_bew:p("bewoelkung%","bewoelkung","wbew"),w_wind:p("windbft","wind","windstaerke","wwind"),w_dir:p("windrichtung","wdir"),w_nied:p("niederschlag","wnied"),w_feu:p("luftfeuchte%","luftfeuchte","wfeu"),w_mond:p("mondphase","mond","wmond"),w_bem:p("wetterbemerkung","wetternotiz","wbem"),alt:String(p("weiterearten(unsicher)","weiterearten","altarten")),bem:String(p("bem","bemerkung","bemerkungen")),foto:m.foto||""}}
 async function readObsRows(f){
  if(!/\.xlsx?$/i.test(f.name))return await readRows(f);
  const X=await loadXLSX(),wb=X.read(await f.arrayBuffer(),{type:"array"});
@@ -537,7 +554,8 @@ async function readObsRows(f){
 function sameObs(a,b){for(const k of Object.keys(b)){if(k==="foto"||k==="id")continue;
  if(k==="lat"||k==="lng"){const x=parseFloat(a[k]),y=parseFloat(b[k]);if(isNaN(x)!==isNaN(y)||(!isNaN(x)&&Math.abs(x-y)>1e-6))return false}
  else if(String(a[k]??"")!==String(b[k]??""))return false}
- for(const k of WXK)if(String(a["w_"+k]??"")!==String(b["w_"+k]??""))return false;return true}
+ for(const k of WXK)if(String(a["w_"+k]??"")!==String(b["w_"+k]??""))return false;
+ if(!!a.unsicher!==!!b.unsicher||JSON.stringify(a.alt||[])!==JSON.stringify(b.alt||[]))return false;return true}
 function importObs(rows,prepend){
  const cnt=new Map();for(const o of S.obs){const k=obsKey(o);cnt.set(k,(cnt.get(k)||0)+1)}
  const byId=new Map(S.obs.map(o=>[o.id,o])),spDe=new Map(),spSci=new Map(),siN=new Map();
@@ -558,9 +576,9 @@ function importObs(rows,prepend){
   if(!st&&o.flur){
    if(upsertSite(normSite({name:o.flur,flur:o.flur,mtb:o.mtb,q:o.q,mf:o.mf,ort:o.ort,plz:o.plz,lat:isNaN(la)?"":la,lng:isNaN(ln)?"":ln,hmin:o.hmin,hmax:o.hmax,beschreibung:o.habitat}))==="new")r.si++;
    st=S.sites.find(x=>normKey(x.name)===normKey(o.flur));siN.set(normKey(o.flur),st)}
-  const ob=makeObs({...o,sp:s,site:st});
+  const ob=makeObs({...o,sp:s,site:st,altArr:parseAlt(o.alt,spSci,spDe)});
   const ex=o.id&&byId.get(o.id);
-  if(ex){if(sameObs(ex,ob))r.dup++;else{Object.assign(ex,Object.fromEntries(WXK.map(k=>["w_"+k,""])),ob,{id:ex.id,foto:ex.foto});r.upd++}continue}
+  if(ex){if(sameObs(ex,ob))r.dup++;else{delete ex.alt;delete ex.unsicher;Object.assign(ex,Object.fromEntries(WXK.map(k=>["w_"+k,""])),ob,{id:ex.id,foto:ex.foto});r.upd++}continue}
   const k=obsKey(ob);if((cnt.get(k)||0)>0){cnt.set(k,cnt.get(k)-1);r.dup++;continue}
   out.push(ob)}
  S.obs=prepend?out.concat(S.obs):S.obs.concat(out);r.n=out.length;return r}
@@ -585,10 +603,10 @@ function obsRows(plain){
   return[ser(o.datum),o.zeit||"",o.beobachter||"",o.stadium||"Imago",+o.anzahl||1,o.methode||"",o.bem||"",
    s.kr||o.kr||"",s.de||o.de||"",s.ufam||o.ufam||"",s.fam||o.fam||"",g,a,s.aut||"",s.nds||o.rl_nds||"",s.nds04||o.rl_nds04||"",s.rld||o.rl_d||"",
    o.flur||"",ok?(same&&st.breitengrad_original?st.breitengrad_original:+o.lat):"na.",ok?(same&&st.laengengrad_original?st.laengengrad_original:+o.lng):"na.",
-   o.mtb||"",o.q||"",o.mf||"",o.hmin??"",o.hmax??"",o.ort||"",o.plz||"",o.habitat||"",xn(o.w_temp),xn(o.w_bew),xn(o.w_wind),o.w_dir||"",o.w_nied||"",xn(o.w_feu),o.w_mond||"",o.w_bem||"",o.id||""]})}
+   o.mtb||"",o.q||"",o.mf||"",o.hmin??"",o.hmax??"",o.ort||"",o.plz||"",o.habitat||"",xn(o.w_temp),xn(o.w_bew),xn(o.w_wind),o.w_dir||"",o.w_nied||"",xn(o.w_feu),o.w_mond||"",o.w_bem||"",altText(o),o.id||""]})}
 const exportObXlsx=async()=>{try{const X=await loadXLSX();
  const ws=X.utils.aoa_to_sheet([OB_HEAD,...obsRows(false)]);
- ws["!cols"]=[12,8,28,12,8,16,40,8,32,16,28,16,16,28,8,12,6,34,14,14,7,4,5,9,9,14,8,50,11,11,9,11,14,11,12,28,16].map(w=>({wch:w}));
+ ws["!cols"]=[12,8,28,12,8,16,40,8,32,16,28,16,16,28,8,12,6,34,14,14,7,4,5,9,9,14,8,50,11,11,9,11,14,11,12,28,40,16].map(w=>({wch:w}));
  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,"Tabelle1");X.writeFile(wb,"Funde.xlsx")}
  catch(err){toast(err.message+" – exportiere stattdessen CSV");$("exCsv").click()}};
 $("exObX").onclick=exportObXlsx;
@@ -607,7 +625,7 @@ function openObEdit(i){
  obOrig={lat:num(o.lat),lng:num(o.lng)};
  const v={datum:o.datum||"",zeit:o.zeit||"",beob:o.beobachter||"",art:`${o.de||o.sci} (${o.sci})`,anz:o.anzahl||1,meth:o.methode||"",bem:o.bem||"",
   flur:o.flur||"",ort:o.ort||"",mtb:o.mtb||"",q:o.q||"",mf:o.mf||"",plz:o.plz||"",lat:obOrig.lat,lng:obOrig.lng,hmin:o.hmin??"",hmax:o.hmax??"",hab:o.habitat||""};
- for(const k in v)$("o_"+k).value=v[k];wxWrite("ow_",o);$("ow_on").checked=wxHas(o);wxToggle("ow_on","o_wxBox");
+ for(const k in v)$("o_"+k).value=v[k];wxWrite("ow_",o);$("ow_on").checked=wxHas(o);wxToggle("ow_on","o_wxBox");ALT.ou_=(o.alt||[]).map(a=>({...a}));$("ou_on").checked=!!o.unsicher||ALT.ou_.length>0;$("ou_box").style.display=$("ou_on").checked?"block":"none";$("ou_in").value="";altRender("ou_");
  $("o_prev").innerHTML=o.foto?`<img class="thumb" src="${o.foto}">`:"";$("o_rmfoto").checked=false;$("o_foto").value="";
  $("obModal").classList.add("on");$("o_art").focus()}
 $("o_site").onchange=()=>{const s=S.sites[$("o_site").value];if(!s)return;
@@ -625,12 +643,12 @@ $("o_save").onclick=()=>{
  if(hasLa!==hasLn||(hasLa&&(isNaN(la)||isNaN(ln)||Math.abs(la)>90||Math.abs(ln)>180)))return toast("Koordinaten unvollständig oder ungültig – beide ausfüllen oder beide leer lassen");
  const anz=parseInt(ov("anz"));if(!(anz>=1))return toast("Die Anzahl muss mindestens 1 sein");
  if(!hasLa&&!ov("flur")&&!ov("mtb"))return toast("Bitte Fundort, MTB oder Koordinaten angeben");
- const n={datum:ov("datum"),zeit:ov("zeit"),beobachter:ov("beob"),anzahl:anz,stadium:$("o_stad").value,methode:ov("meth"),bem:ov("bem"),
+ const n={datum:ov("datum"),zeit:ov("zeit"),beobachter:ov("beob"),anzahl:anz,stadium:$("o_stad").value,methode:ov("meth"),bem:setUns(ov("bem"),$("ou_on").checked),
   flur:ov("flur"),ort:ov("ort"),mtb:ov("mtb"),q:ov("q"),mf:ov("mf"),plz:ov("plz"),hmin:ov("hmin"),hmax:ov("hmax"),habitat:ov("hab"),
   lat:ov("lat")===obOrig.lat?o.lat:(hasLa?la:""),lng:ov("lng")===obOrig.lng?o.lng:(hasLn?ln:"")};
  if(s)Object.assign(n,{de:s.de,sci:s.sci,ufam:s.ufam||"",fam:s.fam||"",rl_nds:s.nds||"",rl_nds04:s.nds04||"",rl_d:s.rld||"",kr:s.kr||""});
  if(obPhoto!==undefined)n.foto=obPhoto;else if($("o_rmfoto").checked)n.foto="";
- Object.assign(n,$("ow_on").checked?wxNorm(wxRead("ow_")):wxNorm({}));Object.assign(o,n);persist();renderAll();closeObModal();toast("Fund aktualisiert")};
+ Object.assign(n,$("ow_on").checked?wxNorm(wxRead("ow_")):wxNorm({}));Object.assign(o,n);if($("ou_on").checked){o.unsicher=true;o.alt=ALT.ou_.filter(a=>normKey(a.sci)!==normKey(o.sci)).map(a=>({...a}))}else{delete o.unsicher;delete o.alt}persist();renderAll();closeObModal();toast("Fund aktualisiert")};
 
 /* ===== Auswertung: Karte + Nachweise pro Kalenderwoche ===== */
 const STAD_COL={"Imago":"#0f7a4a","Raupe/Larve":"#e0a100","Ei":"#4f86e8","Puppe":"#8e44ad","Exuvie":"#7f8c8d","Fraßspur":"#b3261e"};
@@ -718,7 +736,7 @@ function initMap2(){
  const lg=L.control({position:"bottomleft"});lg.onAdd=()=>{const dv=L.DomUtil.create("div","legend");dv.innerHTML="● Kreisgröße = Anzahl Nachweise je Fundort";return dv};lg.addTo(map2)}
 function showAusw(){
  if(!$("a_stad").options.length)$("a_stad").innerHTML='<option value="">Alle Stadien</option>'+STAD.map(s=>`<option>${esc(s)}</option>`).join("");
- initMap2();renderAusw();if(map2)setTimeout(()=>{map2.invalidateSize();drawMarkers()},80)}
+ initMap2();renderAusw();rptInit();if(map2)setTimeout(()=>{map2.invalidateSize();drawMarkers()},80)}
 document.querySelector('nav button[data-t="t5"]').addEventListener("click",showAusw);
 ["a_von","a_bis","a_stad","a_met"].forEach(i=>$(i).addEventListener("change",renderAusw));
 $("a_von").addEventListener("input",renderAusw);$("a_bis").addEventListener("input",renderAusw);
@@ -948,6 +966,172 @@ function wipeSites(){
  if(!confirm(`Wirklich alle ${n} Fundorte löschen?\n\nBereits erfasste Funde bleiben erhalten (sie behalten ihre Fundortangaben). Arten bleiben unverändert.\nTipp: Vorher die Fundorte als Excel exportieren.`))return;
  S.sites=[];persist();renderAll();toast(`${n} Fundorte gelöscht`)}
 $("wipeSites").onclick=wipeSites;$("wipeSites2").onclick=wipeSites;
+
+/* ===== Fundbericht als PDF (eigener Mini-PDF-Writer, Standardschrift Helvetica) ===== */
+const PW=595.28,PH=841.89,MX=50,MT=58,MB=58,CW=PW-2*MX;
+const WINMAP={"€":128,"‚":130,"„":132,"…":133,"†":134,"‡":135,"‰":137,"‹":139,"‘":145,"’":146,"“":147,"”":148,"•":149,"–":150,"—":151,"™":153,"›":155};
+function pdfNorm(s){return[...String(s??"")].map(ch=>{const c=ch.codePointAt(0);if(c===10)return"\n";if(c<32)return" ";if(c<128||(c>=160&&c<=255)||WINMAP[ch])return ch;
+ const b=ch.normalize("NFD").replace(/[\u0300-\u036f]/g,"");return b&&b.charCodeAt(0)<128?b[0]:"?"}).join("")}
+function pdfEnc(s){let o="";for(const ch of s){const c=ch.codePointAt(0);o+=c===10?" ":(c<256&&!(c>=128&&c<=159))?String.fromCharCode(c):String.fromCharCode(WINMAP[ch]||63)}return o}
+const pdfStr=s=>pdfEnc(pdfNorm(s)).replace(/[\\()]/g,m=>"\\"+m);
+class Pdf{
+ constructor(){this.pages=[];this.cur=null;this.newPage()}
+ newPage(){this.cur=[];this.pages.push(this.cur)}
+ col(c,st){return Array.isArray(c)?`${c.map(v=>v.toFixed(3)).join(" ")} ${st?"RG":"rg"}`:`${(+c).toFixed(3)} ${st?"G":"g"}`}
+ text(x,y,t,f="R",s=10,c=0){this.cur.push(`BT ${this.col(c)} /F${{R:1,B:2,I:3,BI:4}[f]} ${s} Tf ${x.toFixed(2)} ${(PH-y).toFixed(2)} Td (${pdfStr(t)}) Tj ET`)}
+ rect(x,y,w,h,c){this.cur.push(`${this.col(c)} ${x.toFixed(2)} ${(PH-y-h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re f`)}
+ line(x1,y1,x2,y2,wd=.5,c=.8){this.cur.push(`${this.col(c,true)} ${wd} w ${x1.toFixed(2)} ${(PH-y1).toFixed(2)} m ${x2.toFixed(2)} ${(PH-y2).toFixed(2)} l S`)}
+ build(title){
+  let out="%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n";const off=[0],np=this.pages.length;
+  const put=(n,b)=>{off[n]=out.length;out+=`${n} 0 obj\n${b}\nendobj\n`};
+  put(1,"<< /Type /Catalog /Pages 2 0 R >>");
+  put(2,`<< /Type /Pages /Kids [${this.pages.map((_,i)=>`${9+2*i} 0 R`).join(" ")}] /Count ${np} >>`);
+  ["Helvetica","Helvetica-Bold","Helvetica-Oblique","Helvetica-BoldOblique"].forEach((n,i)=>put(3+i,`<< /Type /Font /Subtype /Type1 /BaseFont /${n} /Encoding /WinAnsiEncoding >>`));
+  const d=new Date(),p2=n=>String(n).padStart(2,"0");
+  put(7,`<< /Title (${pdfStr(title)}) /Creator (FalterKataster) /Producer (FalterKataster) /CreationDate (D:${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}) >>`);
+  this.pages.forEach((ops,i)=>{const data=ops.join("\n");
+   put(8+2*i,`<< /Length ${data.length} >>\nstream\n${data}\nendstream`);
+   put(9+2*i,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R >> >> /Contents ${8+2*i} 0 R >>`)});
+  const n=8+2*np,xr=out.length;
+  out+=`xref\n0 ${n}\n0000000000 65535 f \n`+off.slice(1,n).map(o=>String(o).padStart(10,"0")+" 00000 n \n").join("")+`trailer\n<< /Size ${n} /Root 1 0 R /Info 7 0 R >>\nstartxref\n${xr}\n%%EOF`;
+  const u=new Uint8Array(out.length);for(let i=0;i<out.length;i++)u[i]=out.charCodeAt(i)&255;return u}
+}
+const WT=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+const wday=d=>{const m=d.match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?WT[new Date(Date.UTC(+m[1],+m[2]-1,+m[3])).getUTCDay()]:""};
+const pl=(n,e,m)=>`${n} ${n===1?e:m}`;
+function rptData(cfg){
+ const sp=new Map(S.species.map(s=>[normKey(s.sci),s]));
+ const rows=S.obs.filter(o=>/^\d{4}-\d{2}-\d{2}$/.test(o.datum||"")&&o.datum>=cfg.von&&o.datum<=cfg.bis).map(o=>{const s=sp.get(normKey(o.sci))||{};return{o,de:s.de||o.de||"",sci:o.sci||s.sci||"",kr:s.kr||o.kr||"",anz:parseInt(o.anzahl)||1}});
+ const g=new Map();for(const r of rows){const k=normKey(r.sci);let e=g.get(k);if(!e){e={de:r.de,sci:r.sci,kr:r.kr,n:0,ind:0};g.set(k,e)}e.n++;e.ind+=r.anz}
+ const col=(a,b)=>String(a).localeCompare(String(b),"de");
+ const arr=[...g.values()].sort(cfg.sort==="de"?(a,b)=>col(a.de||a.sci,b.de||b.sci):cfg.sort==="n"?(a,b)=>b.ind-a.ind||col(a.sci,b.sci):cfg.sort==="kr"?(a,b)=>col(a.kr||"zzzzz",b.kr||"zzzzz")||col(a.sci,b.sci):(a,b)=>col(a.sci,b.sci));
+ const orte=new Set(rows.map(r=>r.o.flur?normKey(r.o.flur):(r.o.lat!==""&&r.o.lat!=null?r.o.lat+","+r.o.lng:"")).filter(Boolean));
+ const days=new Map();for(const r of rows){if(!days.has(r.o.datum))days.set(r.o.datum,[]);days.get(r.o.datum).push(r)}
+ const dayList=[...days.keys()].sort().map(d=>({d,rows:days.get(d).sort((a,b)=>col(a.o.zeit||"",b.o.zeit||"")||col(a.de||a.sci,b.de||b.sci)),ind:days.get(d).reduce((s,r)=>s+r.anz,0)}));
+ return{rows,arr,nN:rows.length,nI:rows.reduce((s,r)=>s+r.anz,0),nS:arr.length,nF:orte.size,days:dayList}}
+function rptBuild(cfg,data){
+ const doc=new Pdf(),mc=document.createElement("canvas").getContext("2d");
+ const fnt=(f,s)=>`${f==="B"||f==="BI"?"bold ":""}${f==="I"||f==="BI"?"italic ":""}${s}px Arial,Helvetica,sans-serif`;
+ const mw=(t,f,s)=>{mc.font=fnt(f,s);return mc.measureText(pdfNorm(t)).width};
+ function wrap(t,w,f,s){const out=[];for(const para of pdfNorm(t).split("\n")){let line="";for(const word of para.split(" ")){
+   const cand=line?line+" "+word:word;if(mw(cand,f,s)<=w){line=cand;continue}
+   if(line){out.push(line);line=""}
+   if(mw(word,f,s)<=w){line=word;continue}
+   let part="";for(const ch of word){if(part&&mw(part+ch,f,s)>w){out.push(part);part=ch}else part+=ch}line=part}
+  out.push(line)}return out}
+ const df=d=>fmtDate(d,"dmy"),per=cfg.von===cfg.bis?`Datum: ${wday(cfg.von)}, ${df(cfg.von)}`:`Zeitraum: ${df(cfg.von)} – ${df(cfg.bis)}`;
+ const GREEN=[.06,.48,.29],DKG=[.05,.3,.18];let y=50;
+ const np=()=>{doc.newPage();y=MT;doc.text(MX,36,`${cfg.title} · ${per}`,"R",8,.45);doc.line(MX,42,MX+CW,42,.5,.85)};
+ const ensure=h=>{if(y+h>PH-MB)np()};
+ const h2=t=>{ensure(60);doc.text(MX,y+13,t,"B",13,DKG);y+=20;doc.line(MX,y,MX+CW,y,.8,GREEN);y+=10};
+ function table(cols,rows,o={}){
+  const fs=o.fs||9,pad=3.5,lead=1.22,hdH=fs+2*pad+1;
+  const cellLines=(cell,col,bold)=>{const runs=Array.isArray(cell)?cell:[{t:cell}],L=[];for(const r of runs){const f=bold?"B":(r.f||col.f||"R"),s=r.s||fs;for(const ln of wrap(String(r.t??""),col.w-2*pad,f,s))L.push({t:ln,f,s,c:r.c??0})}return L};
+  const prep=rows.map(r=>{if(r.note){const ls=wrap(r.note,CW-2*pad-12,"I",fs-1).map(t=>({t,f:"I",s:fs-1,c:.4}));return{note:true,ls,h:ls.reduce((a,l)=>a+l.s*lead,0)+pad}}
+   const cells=Array.isArray(r)?r:r.cells,ls=cells.map((c,i)=>cellLines(c,cols[i],r.bold));return{ls,bold:r.bold,h:Math.max(...ls.map(l=>l.reduce((a,x)=>a+x.s*lead,0)))+2*pad}});
+  const drawHead=()=>{doc.rect(MX,y,CW,hdH,[.88,.95,.91]);let x=MX;cols.forEach(c=>{const tw=mw(c.hd,"B",fs);doc.text(c.a==="r"?x+c.w-pad-tw:x+pad,y+pad+fs-1,c.hd,"B",fs,DKG);x+=c.w});y+=hdH};
+  ensure(hdH+(prep[0]?prep[0].h:0));drawHead();
+  for(let i=0;i<prep.length;i++){const r=prep[i],nx=prep[i+1],hasNote=nx&&nx.note;
+   if(y+r.h+(hasNote?nx.h:0)>PH-MB){np();drawHead()}
+   if(r.note){let ty=y;for(const l of r.ls){doc.text(MX+12,ty+l.s*.95,l.t,l.f,l.s,l.c);ty+=l.s*lead}y+=r.h;doc.line(MX,y,MX+CW,y,.4,.88);continue}
+   if(r.bold)doc.rect(MX,y,CW,r.h,[.95,.95,.95]);
+   let x=MX;r.ls.forEach((ls,i)=>{let ty=y+pad;for(const l of ls){const tw=cols[i].a==="r"?mw(l.t,l.f,l.s):0;doc.text(cols[i].a==="r"?x+cols[i].w-pad-tw:x+pad,ty+l.s*.95,l.t,l.f,l.s,l.c);ty+=l.s*lead}x+=cols[i].w});
+   y+=r.h;if(!hasNote)doc.line(MX,y,MX+CW,y,r.bold?.8:.4,r.bold?.5:.88)}
+  y+=10}
+ /* Kopf (Head) */
+ if(cfg.head.trim()){const hl=wrap(cfg.head.trim(),CW,"R",10);
+  hl.forEach((l,i)=>{doc.text(MX,y+10,l,i===0?"B":"R",i===0?12:10,i===0?DKG:.3);y+=i===0?16:13});
+  y+=2;doc.line(MX,y,MX+CW,y,1.2,GREEN);y+=22}
+ for(const l of wrap(cfg.title,CW,"B",22)){doc.text(MX,y+19,l,"B",22,GREEN);y+=27}
+ doc.text(MX,y+12,per,"R",11,.2);y+=17;
+ const now=new Date();doc.text(MX,y+9,`Erstellt am ${String(now.getDate()).padStart(2,"0")}.${String(now.getMonth()+1).padStart(2,"0")}.${now.getFullYear()}`,"R",8.5,.5);y+=26;
+ /* Zusammenfassung */
+ h2("Zusammenfassung");
+ const intro=`${cfg.von===cfg.bis?"Am":"Im Zeitraum vom"} ${cfg.von===cfg.bis?df(cfg.von):df(cfg.von)+" bis "+df(cfg.bis)} wurden ${pl(data.nN,"Nachweis","Nachweise")} mit ${pl(data.nI,"Individuum","Individuen")} von ${pl(data.nS,"Art","Arten")} an ${pl(data.nF,"Fundort","Fundorten")} registriert.`;
+ for(const l of wrap(intro,CW,"R",10)){ensure(14);doc.text(MX,y+10,l,"R",10);y+=14}
+ y+=6;
+ const srt={n:"nach Anzahl der Individuen (absteigend)",sci:"nach wissenschaftlichem Namen",de:"nach deutschem Namen",kr:"nach Systematik (K&R-Nummer)"}[cfg.sort];
+ doc.text(MX,y+9,`Arten, sortiert ${srt}`,"I",8.5,.45);y+=16;
+ const scol=[{w:180,hd:"Art"},{w:165,hd:"Wissenschaftlicher Name",f:"I"},{w:72,hd:"Nachweise",a:"r"},{w:78,hd:"Individuen",a:"r"}];
+ table(scol,[...data.arr.map(a=>[a.de||"–",a.sci,String(a.n),String(a.ind)]),{cells:["Gesamt",pl(data.nS,"Art","Arten"),String(data.nN),String(data.nI)],bold:true}]);
+ /* Einzelfunde */
+ if(cfg.detail){
+  y+=6;h2("Einzelfunde");
+  const dcol=[{w:150,hd:"Art"},{w:62,hd:"Stadium"},{w:34,hd:"Anz.",a:"r"},{w:150,hd:"Fundort"},{w:99,hd:"Beobachter"}];
+  for(const day of data.days){
+   ensure(22+20+30);
+   doc.text(MX,y+11,`${wday(day.d)}, ${df(day.d)}`,"B",10.5);
+   doc.text(MX+CW-mw(`${pl(day.rows.length,"Nachweis","Nachweise")} · ${pl(day.ind,"Individuum","Individuen")}`,"R",9),y+11,`${pl(day.rows.length,"Nachweis","Nachweise")} · ${pl(day.ind,"Individuum","Individuen")}`,"R",9,.4);y+=17;
+   const trs=[];
+   for(const r of day.rows){const o=r.o,ort=[o.ort&&o.ort!==o.flur?o.ort:"",mtbLabel(o)].filter(Boolean).join(" · ");
+    trs.push([[{t:r.de||r.sci},...(r.de?[{t:r.sci,f:"I",s:7.5,c:.4}]:[])],o.stadium||"Imago",String(r.anz),[{t:o.flur||"–"},...(ort?[{t:ort,s:7.5,c:.4}]:[])],o.beobachter||""]);
+    const un=o.unsicher?`${UNS}${o.alt&&o.alt.length?" – weitere Arten: "+altText(o):""}`:"",note=[un,cfg.bem?stripUns(o.bem):"",cfg.wetter&&wxHas(o)?wxText(o):""].filter(Boolean).join(" – ");if(note)trs.push({note});}
+   table(dcol,trs,{fs:8.5})}}
+ /* Quellen */
+ if(cfg.quellen.trim()){y+=4;h2("Quellen");for(const l of wrap(cfg.quellen.trim(),CW,"R",9.5)){ensure(13);doc.text(MX,y+9,l,"R",9.5,.15);y+=12.5}}
+ /* Fußzeile */
+ const N=doc.pages.length;doc.pages.forEach((_,i)=>{doc.cur=doc.pages[i];doc.line(MX,PH-42,MX+CW,PH-42,.5,.85);
+  doc.text(MX,PH-30,"FalterKataster · "+cfg.title,"R",8,.5);const t=`Seite ${i+1} von ${N}`;doc.text(MX+CW-mw(t,"R",8),PH-30,t,"R",8,.5)});
+ return doc.build(cfg.title)}
+/* --- Oberfläche --- */
+const isoDay=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+function rptRead(){const von=$("r_von").value;return{von,bis:$("r_bis").value||von,title:$("r_title").value.trim()||"Fundbericht",head:$("r_head").value,quellen:$("r_quellen").value,sort:$("r_sort").value,detail:$("r_detail").checked,bem:$("r_bem").checked,wetter:$("r_wetter").checked}}
+function rptInfo(){const c=rptRead();if(!c.von){$("r_info").textContent="Bitte Datum wählen.";return}
+ if(c.bis<c.von){$("r_info").textContent="Das Enddatum liegt vor dem Startdatum.";return}
+ const d=rptData(c);$("r_info").textContent=d.nN?`${pl(d.nN,"Nachweis","Nachweise")} · ${pl(d.nS,"Art","Arten")} · ${pl(d.days.length,"Fundtag","Fundtage")} im gewählten Zeitraum`:"Keine Funde im gewählten Zeitraum."}
+function rptInit(){
+ const c=S.rptCfg||{};
+ if(!$("r_title").dataset.init){$("r_title").value=c.title||"Fundbericht";$("r_head").value=c.head||"";$("r_quellen").value=c.quellen||"";$("r_sort").value=c.sort||"n";$("r_detail").checked=c.detail!==false;$("r_bem").checked=!!c.bem;$("r_wetter").checked=!!c.wetter;$("r_title").dataset.init="1"}
+ if(!$("r_von").value){const last=S.obs.reduce((m,o)=>/^\d{4}-\d{2}-\d{2}$/.test(o.datum||"")&&o.datum>m?o.datum:m,"");$("r_von").value=$("r_bis").value=last||isoDay(new Date())}
+ rptInfo()}
+const setRange=(a,b)=>{$("r_von").value=a;$("r_bis").value=b;rptInfo()};
+$("r_today").onclick=()=>{const t=isoDay(new Date());setRange(t,t)};
+$("r_last").onclick=()=>{const last=S.obs.reduce((m,o)=>/^\d{4}-\d{2}-\d{2}$/.test(o.datum||"")&&o.datum>m?o.datum:m,"");if(last)setRange(last,last)};
+$("r_7").onclick=()=>{const e=new Date(),s=new Date();s.setDate(s.getDate()-6);setRange(isoDay(s),isoDay(e))};
+$("r_year").onclick=()=>{const e=new Date();setRange(`${e.getFullYear()}-01-01`,isoDay(e))};
+["r_von","r_bis"].forEach(i=>{$(i).addEventListener("input",rptInfo);$(i).addEventListener("change",rptInfo)});
+$("r_pdf").onclick=()=>{
+ const cfg=rptRead();if(!cfg.von)return toast("Bitte ein Datum wählen");if(cfg.bis<cfg.von)return toast("Das Enddatum liegt vor dem Startdatum");
+ const data=rptData(cfg);if(!data.nN)return toast("Keine Funde im gewählten Zeitraum");
+ if(cfg.detail&&data.nN>3000&&!confirm(`Der Zeitraum enthält ${data.nN} Nachweise – die Einzelfundliste wird sehr lang (ca. ${Math.round(data.nN/28)} Seiten). Trotzdem erstellen?\n(Abbrechen, um den Zeitraum zu verkleinern oder die Einzelfunde abzuschalten.)`))return;
+ S.rptCfg={title:cfg.title,head:cfg.head,quellen:cfg.quellen,sort:cfg.sort,detail:cfg.detail,bem:cfg.bem,wetter:cfg.wetter};persist();
+ try{const pdf=rptBuild(cfg,data);
+  dlBlob(`${cfg.title.replace(/[^\wäöüÄÖÜß]+/g,"-")}_${cfg.von}${cfg.bis!==cfg.von?"_bis_"+cfg.bis:""}.pdf`,new Blob([pdf],{type:"application/pdf"}));
+  toast(`Fundbericht erstellt (${pl(data.nS,"Art","Arten")}, ${pl(data.nN,"Nachweis","Nachweise")})`)}
+ catch(e){toast("PDF konnte nicht erzeugt werden: "+e.message)}};
+
+/* ===== Unsichere Artbestimmung: weitere Arten zu einem Fund ===== */
+const UNS="unsichere Artbestimmung";
+const setUns=(bem,on)=>{const rest=String(bem||"").replace(/^unsichere Artbestimmung\s*(;\s*)?/i,"").trim();return on?(rest?`${UNS}; ${rest}`:UNS):rest};
+const stripUns=b=>String(b||"").replace(/^unsichere Artbestimmung\s*(;\s*)?/i,"").trim();
+const altSnap=s=>({sci:s.sci,de:s.de||"",kr:s.kr||"",aut:s.aut||""});
+const altEntry=a=>[a.kr,a.de,a.sci,a.aut].filter(Boolean).join(", ");
+const altText=o=>(o.alt||[]).map(altEntry).join(" | ");
+function unsPick(x){const n=x.altArr&&x.altArr.length;return n||/^unsichere Artbestimmung/i.test(String(x.bem||""))?{unsicher:true,alt:x.altArr||[]}:{}}
+function parseAlt(str,spSci,spDe){const out=[];
+ for(const ent of String(str||"").split("|")){const toks=ent.split(",").map(x=>x.trim()).filter(Boolean);if(!toks.length)continue;
+  let s=null;for(const t of toks){s=spSci.get(normKey(t));if(s)break}
+  if(!s)for(const t of toks){s=spDe.get(normKey(t));if(s)break}
+  if(s&&!out.some(a=>a.sci===s.sci))out.push(altSnap(s))}
+ return out}
+const ALT={u_:[],ou_:[]};
+function altFields(p){return`<p class="sub" style="font-size:12px;margin:0 0 8px">Weitere Arten, mit denen der Fund verwechselt werden könnte. K&amp;R, Name und Autor werden in der Fundliste kommagetrennt aufgeführt; der Fund erhält die Bemerkung „${UNS}“.</p>
+ <div style="display:flex;gap:6px"><input id="${p}in" list="spl" placeholder="Weitere Art suchen …" autocomplete="off"><button type="button" class="btn s" id="${p}add" style="white-space:nowrap">+ hinzufügen</button></div><div class="chips" id="${p}chips"></div>`}
+function altRender(p){$(p+"chips").innerHTML=ALT[p].map((a,i)=>`<span class="chip" title="${esc(altEntry(a))}"><b>${esc(a.kr||"–")}</b> ${esc(a.de)} <i>${esc(a.sci)}</i>${a.aut?` <small>(${esc(a.aut)})</small>`:""} <a href="#" data-altdel="${p}:${i}" title="Entfernen">✕</a></span>`).join("")||'<span class="sub" style="font-size:12px">Noch keine weitere Art gewählt – der Fund wird nur als „unsichere Artbestimmung“ markiert.</span>'}
+function altAdd(p,primary){
+ const s=findSp($(p+"in").value);if(!s)return toast("Bitte eine Art aus der Liste wählen");
+ if(primary&&normKey(primary.sci)===normKey(s.sci))return toast("Das ist bereits die Hauptart des Funds");
+ if(ALT[p].some(a=>normKey(a.sci)===normKey(s.sci)))return toast("Diese Art ist schon in der Liste");
+ if(ALT[p].length>=10)return toast("Maximal 10 weitere Arten");
+ ALT[p].push(altSnap(s));$(p+"in").value="";altRender(p)}
+$("u_fields").innerHTML=altFields("u_");$("ou_fields").innerHTML=altFields("ou_");
+altRender("u_");altRender("ou_");
+$("u_on").onchange=()=>{$("u_box").style.display=$("u_on").checked?"block":"none"};
+$("ou_on").onchange=()=>{$("ou_box").style.display=$("ou_on").checked?"block":"none"};
+$("u_add").onclick=()=>altAdd("u_",findSp($("art").value));
+$("ou_add").onclick=()=>altAdd("ou_",findSp($("o_art").value));
+["u_in","ou_in"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$(i.replace("in","add")).click()}}));
+function uReset(){$("u_on").checked=false;$("u_box").style.display="none";ALT.u_=[];$("u_in").value="";altRender("u_")}
 
 /* Start */
 (async()=>{await idb();await load();mergeSeed();mergeFundeSeed();initMap();now();renderAll()})();
