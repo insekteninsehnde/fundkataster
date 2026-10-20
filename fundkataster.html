@@ -26,7 +26,7 @@ h2{margin:0 0 2px;font-size:20px}.sub{color:var(--mu);margin:0 0 14px}
 .card{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:14px}
 .card h3{margin:0 0 10px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
 .card h3 a{font-size:12px;text-transform:none;letter-spacing:0;color:var(--g);cursor:pointer;font-weight:500}
-.row{display:grid;gap:10px;margin-bottom:10px}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.species-filters{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:8px;align-items:end;margin-bottom:10px}.species-filters>input{min-width:0}.species-filters>div{min-width:0}.species-filters select{min-width:0}@media(max-width:900px){.species-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}.row{display:grid;gap:10px;margin-bottom:10px}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}.c4{grid-template-columns:1fr 1fr 1fr 1fr}
 label{display:block;font-size:12px;color:var(--mu);margin-bottom:3px}
 input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:7px;font:inherit;background:#fff;color:var(--tx)}
 input[readonly]{background:#eef1f4}textarea{resize:vertical;min-height:54px}
@@ -108,7 +108,12 @@ th,td{padding:7px 10px;border-bottom:1px solid #eef0f2;text-align:left;vertical-
  <div class="grid2 cat">
   <div><div class="card"><h3><span>Arten <span id="spn" class="pill"></span></span><a id="newSp2">+ Neue Art</a></h3>
    <p class="sub" style="font-size:12px">Excel (<code>.xlsx</code>) oder CSV im Format <code>K&amp;R · trivial Name · Überfamilie · Familie · Gattungsname · Artname · Autor · RL NDS · RL NDS 2004 · RL D</code>. Bereits vorhandene Arten (gleicher wissenschaftlicher Name) werden nicht doppelt angelegt, leere Felder aber ergänzt.</p>
-   <input type="file" id="spFile" accept=".xlsx,.xls,.csv,.txt,.json" style="margin-bottom:8px"> <span style="display:inline-flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><button class="btn s" id="exSpX2">⬇ Excel</button><button class="btn s" id="exSpC2">⬇ CSV</button><button class="btn s" id="exSpJ2">⬇ JSON</button></span><input id="spFilter" placeholder="Arten filtern…"></div>
+   <input type="file" id="spFile" accept=".xlsx,.xls,.csv,.txt,.json" style="margin-bottom:8px"> <span style="display:inline-flex;gap:4px;flex-wrap:wrap;margin-bottom:8px"><button class="btn s" id="exSpX2">⬇ Excel</button><button class="btn s" id="exSpC2">⬇ CSV</button><button class="btn s" id="exSpJ2">⬇ JSON</button></span><div class="species-filters">
+     <input id="spFilter" aria-label="Arten suchen" placeholder="Arten suchen (Name, K&R, Autor …)">
+     <div><label>Überfamilie</label><select id="spUfFilter"><option value="">Alle Überfamilien</option></select></div>
+     <div><label>Familie</label><select id="spFamFilter"><option value="">Alle Familien</option></select></div>
+     <div><label>Rote Liste Nds.</label><select id="spNdsFilter"><option value="">Alle Kategorien</option></select></div>
+    </div></div>
    <div style="max-height:55vh;overflow:auto"><table id="spTab"></table></div></div>
   <div><div class="card"><h3><span>Fundorte <span id="sin" class="pill"></span></span><a id="newSi">+ Neuer Fundort</a></h3>
    <p class="sub" style="font-size:12px">Excel (<code>.xlsx</code>) oder CSV im Format <code>Flur Bezeichnung · Breitengrad · Längengrad · MTB · Q · MF · Höhe Min · Höhe Max · Ort · PLZ · Beschreibung</code>. Koordinaten als <code>52°17'58.9"N</code> oder dezimal, <code>na.</code> = unbekannt. Gleichnamige Fundorte werden nicht doppelt angelegt (leere Felder werden ergänzt).</p>
@@ -363,7 +368,10 @@ $("save").onclick=()=>{const s=findSp($("art").value);if(!s)return toast("Bitte 
 /* Tabellen */
 function renderCat(){
  const f=$("spFilter").value.toLowerCase(),g=$("siFilter").value.toLowerCase();
- const sp=S.species.map((s,i)=>[s,i]).filter(([s])=>[s.de,s.sci,s.ufam,s.fam,s.aut,s.nds,s.nds04,s.rld,s.kr].join(" ").toLowerCase().includes(f));
+ const fillCat=(id,field,placeholder)=>{const el=$(id),value=el.value,vals=[...new Set(S.species.map(s=>(s[field]||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"de"));el.innerHTML=`<option value="">${placeholder}</option>`+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join("");el.value=vals.includes(value)?value:"";};
+ fillCat("spUfFilter","ufam","Alle Überfamilien");fillCat("spFamFilter","fam","Alle Familien");fillCat("spNdsFilter","nds","Alle Kategorien");
+ const uf=$("spUfFilter").value,fam=$("spFamFilter").value,nds=$("spNdsFilter").value;
+ const sp=S.species.map((s,i)=>[s,i]).filter(([s])=>[s.de,s.sci,s.ufam,s.fam,s.aut,s.nds,s.nds04,s.rld,s.kr].join(" ").toLowerCase().includes(f)&&(!uf||s.ufam===uf)&&(!fam||s.fam===fam)&&(!nds||s.nds===nds));
  $("spTab").innerHTML="<tr><th>K&amp;R</th><th>Trivialname</th><th>Wissenschaftlich</th><th>Überfamilie</th><th>Familie</th><th>Autor</th><th>RL NDS</th><th>RL NDS 2004</th><th>RL D</th><th></th></tr>"+sp.map(([s,i])=>`<tr><td>${esc(s.kr)}</td><td>${esc(s.de)}</td><td><i>${esc(s.sci)}</i></td><td>${esc(s.ufam)}</td><td>${esc(s.fam)}</td><td>${esc(s.aut)}</td><td>${esc(s.nds)}</td><td>${esc(s.nds04)}</td><td>${esc(s.rld)}</td><td style="white-space:nowrap"><a href="#" data-edit-sp="${i}">✎ Bearbeiten</a> &nbsp; <a href="#" data-sp="${i}">✕</a></td></tr>`).join("");
  $("spn").textContent=S.species.length;$("sin").textContent=S.sites.length;
  const si=S.sites.map((s,i)=>[s,i]).filter(([s])=>[s.name,s.flur,mtbLabel(s),s.ort,s.plz,s.beschreibung,s.hab].join(" ").toLowerCase().includes(g));
@@ -377,6 +385,7 @@ document.addEventListener("click",e=>{const ad=e.target.closest("a[data-altdel]"
  const a=e.target.closest("a[data-sp],a[data-si],a[data-ob]");if(!a)return;e.preventDefault();
  if(!confirm("Eintrag löschen?"))return;if(a.dataset.sp)S.species.splice(a.dataset.sp,1);if(a.dataset.si)S.sites.splice(a.dataset.si,1);if(a.dataset.ob)S.obs.splice(a.dataset.ob,1);persist();renderAll()});
 ["spFilter","siFilter","obFilter"].forEach(i=>$(i).oninput=()=>{obLimit=300;renderCat();renderObs()});
+["spUfFilter","spFamFilter","spNdsFilter"].forEach(i=>$(i).onchange=()=>renderCat());
 function renderAll(){renderSel();renderCat();renderObs();if($("t5").classList.contains("on"))renderAusw()}
 /* CSV */
 function parseCSV(t){t=t.replace(/^\uFEFF/,"");const d=(t.split("\n")[0].match(/;/g)||[]).length>=(t.split("\n")[0].match(/,/g)||[]).length?";":",";const rows=[];let r=[],c="",q=false;
